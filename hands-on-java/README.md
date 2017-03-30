@@ -1,15 +1,12 @@
 ###Stateless transformations - Cecilia
 - Create a topic with <key, value> =  <ID COMMIT,CONTRIBUTEUR>
-- Create a topic with <key, value> =  <ID COMMIT,COMMENTAIRE>
-- Create a topics related about a fix <ID COMMIT,COMMENTAIRE>
+- Create a topics related about a fix and another for the others <ID COMMIT,COMMENTAIRE>
 - Create a topic with <key, value> =  <ID CONTRINUTOR,CONTRIBUTEUR INFO>
-- Create a topics with only commit of 2016 and an other with only 2017
 
 
 ###Stateful transformations- Cecilia
-- Count how many Commit done for 2016 and 2017
+- Make a table with top 10 more big commit comment
 - Make a table with top 10 contributors and number of commit
-- Make a table with top 10 more big commit comments
 - Make a table for know how many commit relate to a "fix" for each year
 
 ###Joining -  Dumas
