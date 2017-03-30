@@ -1,7 +1,8 @@
 ###Stateless transformations - Cecilia
 - Create a topic with <key, value> =  <ID COMMIT,CONTRIBUTEUR>
 - Create a topic with <key, value> =  <ID COMMIT,COMMENTAIRE>
-- Create a topic with <key, value> =  <ID CONTRINUTOR,AVATAR_URL>
+- Create a topics related about a fix <ID COMMIT,COMMENTAIRE>
+- Create a topic with <key, value> =  <ID CONTRINUTOR,CONTRIBUTEUR INFO>
 - Create a topics with only commit of 2016 and a other with only 2017
 
 
@@ -9,6 +10,7 @@
 - Count how many Commit done for 2016 and 2017
 - Make a table with top 10 contributors and number of commit
 - Make a table with top 10 more big commit comment
+- Make a table for know how many commit relate to a "fix" for each year
 
 ###Joining -  Dumas
 ###Windowing - Saleh
@@ -16,4 +18,4 @@
 ###Querying local window stores -  Saleh
 
 ###Exposing the REST endpoints of your application - Cecilia
-- Exposing top 10 contributors
+- Exposing top 10 contributors with their information
