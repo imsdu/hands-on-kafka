@@ -1,9 +1,9 @@
 
-###Run landoop/fast-data-dev on linux
+## Run landoop/fast-data-dev on linux
 
 docker run --rm --net=host -v ~/projects/devoxx-handson-java:/data landoop/fast-data-dev
 
-###Run landoop/fast-data-dev on mac
+## Run landoop/fast-data-dev on mac
 
 
 On Mac OS X allocate at least 6GB RAM to the VM:
@@ -21,7 +21,7 @@ docker run --rm -p 2181:2181 -p 3030:3030 -p 8081-8083:8081-8083 \
 
 ```
 
-###Configuation Kafka Connect
+## Configuation Kafka Connect
 
 For ingestion of commits.json
 ```
@@ -47,6 +47,6 @@ For ingestion of contributors.json
 ```
 
 
-### How to scrap Github API ? 
+## How to scrap Github API ? 
 for i in {1..11}; do ( http -a user:pass --pretty=none https://api.github.com/repos/scala/scala/contributors\?page\=$i --pretty=none | jq --compact-output '.[]' ) >> /tmp/contributors.json done
 for i in {1..901}; do ( http -a user:pass --pretty=none https://api.github.com/repos/scala/scala/commits\?page\=$i --pretty=none | jq --compact-output '.[]' ) >> ./commits.json done
