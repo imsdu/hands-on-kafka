@@ -20,6 +20,7 @@ docker-machine env devel
 
 And define ports and advertise hostname:
 
+ <!>  Replace  `myPathToTheProject` with a real path <!>
 
 ```
 docker run --rm -p 2181:2181 -p 3030:3030 -p 8081-8083:8081-8083 \
@@ -36,8 +37,8 @@ For ingestion of commits.json
   "connector.class": "org.apache.kafka.connect.file.FileStreamSourceConnector",
   "file": "/data/commits.json",
   "tasks.max": "1",
-  "name": "Commits.json",
-  "topic": "data-commits"
+  "name": "CommitsConnector",
+  "topic": "commits"
 }
 ```
 
@@ -49,7 +50,7 @@ For ingestion of contributors.json
   "file": "/data/contributors.json",
   "tasks.max": "1",
   "name": "ContributorsConnector",
-  "topic": "data-contributors"
+  "topic": "contributors"
 }
 ```
 
