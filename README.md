@@ -11,6 +11,13 @@ On Mac OS X allocate at least 6GB RAM to the VM:
     docker-machine create --driver virtualbox --virtualbox-cpu-count "4"  --virtualbox-memory "6024" devel
     eval $(docker-machine env devel)
 
+
+Excecute the result of
+
+```
+docker-machine env devel
+```
+
 And define ports and advertise hostname:
 
 
