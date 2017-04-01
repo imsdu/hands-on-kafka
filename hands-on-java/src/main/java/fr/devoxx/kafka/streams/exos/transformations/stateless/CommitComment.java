@@ -1,15 +1,16 @@
-package fr.devoxx.kafka.exos.transformations.stateless;
+package fr.devoxx.kafka.streams.exos.transformations.stateless;
 
+import fr.devoxx.kafka.conf.AppConfiguration;
 import fr.devoxx.kafka.streams.pojo.GitMessage;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
-import fr.devoxx.kafka.conf.AppConfiguration;
+import fr.devoxx.kafka.utils.AppUtils;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 public class CommitComment {
 
-    private static final String APP_ID = "hands-on-kafka-java-app";
+    private static final String APP_ID = AppUtils.appID("CommitComment");
 
     public static void main(String[] args) {
 
@@ -36,17 +37,21 @@ public class CommitComment {
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        // building Kafka Streams Model
         KStreamBuilder kStreamBuilder = new KStreamBuilder();
-        // the source of the streaming analysis is the topic with git messages
-        KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, "scala-gitlog");
 
-        KTable<String, Long> messagesPerUser = messagesStream
-                .groupBy((key, message) -> message.getAuthor(), stringSerde, messageSerde)
-                .count("CountPerUser");
-        messagesPerUser.to(stringSerde, longSerde, "MessagesPerUser");
-        //messagesPerUser.print(stringSerde, longSerde);
+        //START EXO
+
+        KStream<String, GitMessage> messagesStream =
+                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
+
+        KStream<String, String> commit = messagesStream
+                .map((k,v) -> KeyValue.pair(v.getHash(),v.getMessage()));
+
+
+        commit.to(stringSerde, stringSerde, "CommitComment");
+
+        //STOP EXO
+
 
         System.out.println("Starting Kafka Streams Gitlog Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);

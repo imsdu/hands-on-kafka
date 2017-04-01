@@ -37,16 +37,25 @@ public class CountNbrCommitByUser {
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        // building Kafka Streams Model
+        //START EXO
+
         KStreamBuilder kStreamBuilder = new KStreamBuilder();
-        // the source of the streaming analysis is the topic with git messages
         KStream<String, GitMessage> messagesStream =
                 kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
 
         KTable<String, Long> messagesPerUser = messagesStream
-                .groupBy((key, message) -> message.getAuthor(), stringSerde, messageSerde)
+                .groupBy((key, message) ->
+                        message.getAuthor(), stringSerde, messageSerde)
                 .count("CountPerUser");
-        messagesPerUser.to(stringSerde, longSerde, "MessagesPerUser");
+
+        messagesPerUser.foreach((key,value) ->
+                System.out.print(key+ " :" +value));
+        messagesPerUser.to(stringSerde, longSerde, AppConfiguration.MESSAGESPERUSER);
+
+        //STOP EXO
+
+
+
         messagesPerUser.print(stringSerde, longSerde);
 
         System.out.println("Starting Kafka Streams Gitlog Example");

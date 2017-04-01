@@ -2,11 +2,10 @@
 - Create a topic with [key, value] =>  [ID COMMIT,CONTRIBUTOR]
 - Create a topics related about a fix and another for the others [ID COMMIT,COMMENT]
 - Create a topic with [key, value] =  [ID CONTRIBUTOR,CONTRIBUTOR INFO]
-
+- Create POJO pour user and a topic with [key, value] =  [ID USER,USER]
 
 ## Stateful transformations- Cecilia
-- Make a table with top 10 more big commit comment
-- Make a table with top 10 contributors and number of commit
+- With a table with with a count of commit by contributor
 - Make a table for know how many commit relate to a "fix" for each year
 
 ## Joining -  Dumas

@@ -20,6 +20,7 @@ public class AppConfiguration {
     public static String SCALA_GITLOG_TOPIC = "scala-gitlog";
     public static String CONTRIBUTORS_TOPIC = "contributors";
     public static String ALL_USERS_TOPIC = "all-users";
+    public static String MESSAGESPERUSER = "MessagesPerUser";
 
 
     public static Properties getProperties(String APP_ID) {

@@ -1,11 +1,13 @@
-package fr.devoxx.kafka.exos.transformations.statefull;
+package fr.devoxx.kafka.streams.exos.transformations.statefull;
 
+import fr.devoxx.kafka.conf.AppConfiguration;
 import fr.devoxx.kafka.streams.pojo.GitMessage;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
-import fr.devoxx.kafka.conf.AppConfiguration;
+import fr.devoxx.kafka.utils.AppUtils;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -19,7 +21,7 @@ import java.util.Map;
  */
 public class FixCommit {
 
-    private static final String APP_ID = "hands-on-kafka-java-app";
+    private static final String APP_ID = AppUtils.appID("FixCommit");
 
     public static void main(String[] args) {
 
@@ -36,17 +38,26 @@ public class FixCommit {
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
+        //START EXO
+
+
         // building Kafka Streams Model
         KStreamBuilder kStreamBuilder = new KStreamBuilder();
         // the source of the streaming analysis is the topic with git messages
         KStream<String, GitMessage> messagesStream =
                 kStreamBuilder.stream(stringSerde, messageSerde, "scala-gitlog");
 
-        KTable<String, Long> messagesPerUser = messagesStream
-                .groupBy((key, message) -> message.getAuthor(), stringSerde, messageSerde)
-                .count("CountPerUser");
-        messagesPerUser.to(stringSerde, longSerde, "MessagesPerUser");
-        //messagesPerUser.print(stringSerde, longSerde);
+        KTable<String, Long> fixMessageByYears = messagesStream
+                .map((k,v) -> KeyValue.pair(v.getDate().split("-")[0] , v.getMessage()))
+                .filter((k,v) -> v != null && v.toLowerCase().contains(" fix "))
+                .groupByKey(stringSerde,stringSerde)
+                .count("countFix");
+
+
+        //STOP EXO
+
+        fixMessageByYears.print();
+
 
         System.out.println("Starting Kafka Streams Gitlog Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
