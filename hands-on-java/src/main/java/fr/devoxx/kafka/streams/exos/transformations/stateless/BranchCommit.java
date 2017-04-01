@@ -27,7 +27,6 @@ public class BranchCommit {
         // Create an instance of StreamsConfig from the Properties instance
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
         final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
