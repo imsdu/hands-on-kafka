@@ -47,9 +47,7 @@ public class CountNbrCommitByUser {
                 .groupBy((key, message) ->
                         message.getAuthor(), stringSerde, messageSerde)
                 .count("CountPerUser");
-
-        messagesPerUser.foreach((key,value) ->
-                System.out.print(key+ " :" +value));
+        
         messagesPerUser.to(stringSerde, longSerde, AppConfiguration.MESSAGESPERUSER);
 
         //STOP EXO
