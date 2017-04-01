@@ -1,7 +1,7 @@
 ## Stateless transformations - Cecilia
-- Create a topic with <key, value> =  <ID COMMIT,CONTRIBUTEUR>
-- Create a topics related about a fix and another for the others <ID COMMIT,COMMENTAIRE>
-- Create a topic with <key, value> =  <ID CONTRINUTOR,CONTRIBUTEUR INFO>
+- Create a topic with [key, value] =>  [ID COMMIT,CONTRIBUTOR]
+- Create a topics related about a fix and another for the others [ID COMMIT,COMMENT]
+- Create a topic with [key, value] =  [ID CONTRIBUTOR,CONTRIBUTOR INFO]
 
 
 ## Stateful transformations- Cecilia
@@ -15,4 +15,5 @@
 ## Querying local window stores -  Saleh
 
 ## Exposing the REST endpoints of your application - Cecilia
-- Exposing top 10 contributors with their informations
+- Exposing top 10 contributors with their informations (Confluent API)
+- Exposing top 10 contributors with their informations (Personnal REST API)
