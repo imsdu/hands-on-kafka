@@ -1,7 +1,7 @@
 package fr.devoxx.kafka.streams.join;
 
-import fr.devoxx.kafka.pojo.GitMessage;
-import fr.devoxx.kafka.pojo.serde.PojoJsonSerializer;
+import fr.devoxx.kafka.streams.pojo.GitMessage;
+import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;

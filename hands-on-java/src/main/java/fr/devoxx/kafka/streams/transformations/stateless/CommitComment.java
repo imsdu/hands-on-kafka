@@ -1,7 +1,7 @@
 package fr.devoxx.kafka.streams.transformations.stateless;
 
-import fr.devoxx.kafka.pojo.GitMessage;
-import fr.devoxx.kafka.pojo.serde.PojoJsonSerializer;
+import fr.devoxx.kafka.streams.pojo.GitMessage;
+import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
 import fr.devoxx.kafka.streams.conf.AppConfiguration;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;

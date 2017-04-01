@@ -1,4 +1,4 @@
-package fr.devoxx.kafka.pojo;
+package fr.devoxx.kafka.streams.pojo;
 
 import java.util.Date;
 
