@@ -1,4 +1,4 @@
-package fr.devoxx.kafka.streams.join;
+package fr.devoxx.kafka.exos.join;
 
 import fr.devoxx.kafka.streams.pojo.GitMessage;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;

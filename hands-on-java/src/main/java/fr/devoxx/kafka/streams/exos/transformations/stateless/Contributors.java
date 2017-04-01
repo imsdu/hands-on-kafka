@@ -1,8 +1,8 @@
-package fr.devoxx.kafka.streams.transformations.stateless;
+package fr.devoxx.kafka.exos.transformations.stateless;
 
+import fr.devoxx.kafka.conf.AppConfiguration;
 import fr.devoxx.kafka.streams.pojo.GitMessage;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
-import fr.devoxx.kafka.streams.conf.AppConfiguration;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Hands-on kafka streams Devoxx 2017
  */
-public class CommitContributor {
+public class Contributors {
 
     private static final String APP_ID = "hands-on-kafka-java-app";
 

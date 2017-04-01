@@ -1,4 +1,4 @@
-package fr.devoxx.kafka.streams.rest;
+package fr.devoxx.kafka.exos.rest;
 
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;

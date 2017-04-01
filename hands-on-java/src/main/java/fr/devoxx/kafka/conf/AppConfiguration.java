@@ -1,4 +1,4 @@
-package fr.devoxx.kafka.streams.conf;
+package fr.devoxx.kafka.conf;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.streams.StreamsConfig;

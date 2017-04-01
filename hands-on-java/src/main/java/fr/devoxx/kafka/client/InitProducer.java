@@ -1,10 +1,10 @@
-package fr.devoxx.kafka.producer;
+package fr.devoxx.kafka.client;
 
 /**
  * Created by fred on 01/04/2017.
  */
 
-import fr.devoxx.kafka.streams.conf.AppConfiguration;
+import fr.devoxx.kafka.conf.AppConfiguration;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 

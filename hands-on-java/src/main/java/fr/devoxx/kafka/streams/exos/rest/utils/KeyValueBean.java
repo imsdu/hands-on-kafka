@@ -1,9 +1,9 @@
-package fr.devoxx.kafka.streams.rest.utils;
+package fr.devoxx.kafka.exos.rest.utils;
 
 /**
  * Created by fred on 01/04/2017.
  */
-import fr.devoxx.kafka.streams.rest.WordCountInteractiveQueriesRestService;
+import fr.devoxx.kafka.exos.rest.WordCountInteractiveQueriesRestService;
 
 import java.util.Objects;
 
