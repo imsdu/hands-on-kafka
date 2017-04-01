@@ -1,8 +1,9 @@
 package fr.devoxx.kafka.streams.exos.transformations.statefull;
 
+import fr.devoxx.kafka.conf.AppConfiguration;
 import fr.devoxx.kafka.streams.pojo.GitMessage;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
-import fr.devoxx.kafka.conf.AppConfiguration;
+import fr.devoxx.kafka.utils.AppUtils;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -17,9 +18,9 @@ import java.util.Map;
 /**
  * Hands-on kafka streams Devoxx 2017
  */
-public class App {
+public class CountNbrCommitByUser {
 
-    private static final String APP_ID = "hands-on-kafka-java-app";
+    private static final String APP_ID = AppUtils.appID("CountNbrCommitByUser");
 
     public static void main(String[] args) {
 
@@ -46,7 +47,7 @@ public class App {
                 .groupBy((key, message) -> message.getAuthor(), stringSerde, messageSerde)
                 .count("CountPerUser");
         messagesPerUser.to(stringSerde, longSerde, "MessagesPerUser");
-        //messagesPerUser.print(stringSerde, longSerde);
+        messagesPerUser.print(stringSerde, longSerde);
 
         System.out.println("Starting Kafka Streams Gitlog Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
