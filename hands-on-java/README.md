@@ -9,6 +9,7 @@
 ## Stateful transformations- Cecilia
 - With a table with with a count of commit by contributor
 - Make a table for know how many commit relate to a "fix" for each year
+- Make a table with the total size of comment by author
 
 ## Joining -  Dumas
 ## Windowing - Saleh

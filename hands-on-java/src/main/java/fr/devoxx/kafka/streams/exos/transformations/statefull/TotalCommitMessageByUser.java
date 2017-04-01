@@ -18,16 +18,16 @@ import java.util.Map;
 /**
  * Hands-on kafka streams Devoxx 2017
  */
-public class CountNbrCommitByUser {
+public class TotalCommitMessageByUser {
 
-    private static final String APP_ID = AppUtils.appID("CountNbrCommitByUser");
+    private static final String APP_ID = AppUtils.appID("TotalCommitMessageByUser");
 
     public static void main(String[] args) {
 
         // Create an instance of StreamsConfig from the Properties instance
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
         final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
+        final Serde<Integer> intSerde = Serdes.Integer();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
@@ -39,22 +39,27 @@ public class CountNbrCommitByUser {
 
         //START EXO
 
+
+        // building Kafka Streams Model
         KStreamBuilder kStreamBuilder = new KStreamBuilder();
+        // the source of the streaming analysis is the topic with git messages
         KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
+                kStreamBuilder.stream(stringSerde, messageSerde, "scala-gitlog");
 
-        KTable<String, Long> messagesPerUser = messagesStream
-                .groupBy((key, message) ->
-                        message.getAuthor(), stringSerde, messageSerde)
-                .count("CountPerUser");
+        KTable<String, Integer> aggregate = messagesStream
+                .groupBy((k, v) -> v.getAuthor())
+                .aggregate(
+                        () -> 0,
+                        (aggKey, newValue, aggValue) -> aggValue + newValue.getMessage().length(),
+                        intSerde,
+                        "aggregationStore"
+                );
 
-        messagesPerUser.to(stringSerde, longSerde, AppConfiguration.MESSAGESPERUSER);
 
         //STOP EXO
 
+        aggregate.print();
 
-
-        messagesPerUser.print(stringSerde, longSerde);
 
         System.out.println("Starting Kafka Streams Gitlog Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
@@ -63,6 +68,5 @@ public class CountNbrCommitByUser {
         System.out.println("Now started Gitlog Example");
 
     }
-
 
 }
