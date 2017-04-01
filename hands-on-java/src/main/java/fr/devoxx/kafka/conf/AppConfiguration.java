@@ -16,6 +16,11 @@ public class AppConfiguration {
     public static String STATE_DIR_CONFIG = "/tmp";
     public static String AUTO_OFFSET_RESET_CONFIG = "earliest";
 
+    public static String USERS_TOPIC = "users";
+    public static String SCALA_GITLOG_TOPIC = "scala-gitlog";
+    public static String CONTRIBUTORS_TOPIC = "contributors";
+    public static String ALL_USERS_TOPIC = "all-users";
+
 
     public static Properties getProperties(String APP_ID) {
         Properties settings = new Properties();

@@ -1,4 +1,4 @@
-package fr.devoxx.kafka.exos.transformations.statefull;
+package fr.devoxx.kafka.streams.exos.transformations.statefull;
 
 import fr.devoxx.kafka.streams.pojo.GitMessage;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
@@ -40,7 +40,7 @@ public class App {
         KStreamBuilder kStreamBuilder = new KStreamBuilder();
         // the source of the streaming analysis is the topic with git messages
         KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, "scala-gitlog");
+                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
 
         KTable<String, Long> messagesPerUser = messagesStream
                 .groupBy((key, message) -> message.getAuthor(), stringSerde, messageSerde)
