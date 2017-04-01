@@ -1,7 +1,8 @@
-package fr.devoxx.kafka.streams;
+package fr.devoxx.kafka.streams.transformations.stateless;
 
 import fr.devoxx.kafka.streams.conf.AppConfiguration;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import fr.devoxx.kafka.streams.GitMessage;
+import fr.devoxx.kafka.streams.PojoJsonSerializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -12,12 +13,11 @@ import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Hands-on kafka streams Devoxx 2017
  */
-public class App {
+public class Contributors {
 
     private static final String APP_ID = "hands-on-kafka-java-app";
 

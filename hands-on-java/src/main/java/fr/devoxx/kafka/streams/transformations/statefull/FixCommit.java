@@ -1,5 +1,7 @@
-package fr.devoxx.kafka.streams;
+package fr.devoxx.kafka.streams.transformations.statefull;
 
+import fr.devoxx.kafka.streams.GitMessage;
+import fr.devoxx.kafka.streams.PojoJsonSerializer;
 import fr.devoxx.kafka.streams.conf.AppConfiguration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
@@ -17,7 +19,7 @@ import java.util.Properties;
 /**
  * Hands-on kafka streams Devoxx 2017
  */
-public class App {
+public class FixCommit {
 
     private static final String APP_ID = "hands-on-kafka-java-app";
 
@@ -55,6 +57,5 @@ public class App {
         System.out.println("Now started Gitlog Example");
 
     }
-
 
 }
