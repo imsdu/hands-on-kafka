@@ -25,8 +25,8 @@ public class InitProducer {
         props.put("bootstrap.servers", AppConfiguration.BOOTSTRAP_SERVERS_CONFIG);
         props.put("acks", "all");
         props.put("retries", 0);
-        props.put("key.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
-        props.put("value.serializer", "io.confluent.kafka.serializers.KafkaAvroSerializer");
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("schema.registry.url", AppConfiguration.SCHEMA_REGISTRY);
 
 
