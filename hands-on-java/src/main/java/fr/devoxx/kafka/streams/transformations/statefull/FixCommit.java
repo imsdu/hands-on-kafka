@@ -1,9 +1,8 @@
 package fr.devoxx.kafka.streams.transformations.statefull;
 
-import fr.devoxx.kafka.streams.GitMessage;
-import fr.devoxx.kafka.streams.PojoJsonSerializer;
+import fr.devoxx.kafka.pojo.GitMessage;
+import fr.devoxx.kafka.pojo.serde.PojoJsonSerializer;
 import fr.devoxx.kafka.streams.conf.AppConfiguration;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -14,7 +13,6 @@ import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Hands-on kafka streams Devoxx 2017

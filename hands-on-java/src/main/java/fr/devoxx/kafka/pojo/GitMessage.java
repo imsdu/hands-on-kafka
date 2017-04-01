@@ -1,4 +1,4 @@
-package fr.devoxx.kafka.streams;
+package fr.devoxx.kafka.pojo;
 
 /**
  * Created by sdumas on 18/03/17.

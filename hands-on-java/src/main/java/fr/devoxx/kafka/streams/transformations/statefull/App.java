@@ -1,6 +1,8 @@
-package fr.devoxx.kafka.streams;
+package fr.devoxx.kafka.streams.transformations.statefull;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import fr.devoxx.kafka.pojo.GitMessage;
+import fr.devoxx.kafka.pojo.serde.PojoJsonSerializer;
+import fr.devoxx.kafka.streams.conf.AppConfiguration;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -11,19 +13,18 @@ import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Hands-on kafka streams Devoxx 2017
  */
-public class JoiningApp {
+public class App {
 
-    private static final String APP_ID = "hands-on-kafka-joining-app";
+    private static final String APP_ID = "hands-on-kafka-java-app";
 
     public static void main(String[] args) {
 
         // Create an instance of StreamsConfig from the Properties instance
-        StreamsConfig config = new StreamsConfig(getProperties());
+        StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
 
@@ -55,15 +56,5 @@ public class JoiningApp {
 
     }
 
-    private static Properties getProperties() {
-        Properties settings = new Properties();
-        // Set a few key parameters
-        settings.put(StreamsConfig.APPLICATION_ID_CONFIG, APP_ID);
-        // Kafka bootstrap server (broker to talk to)
-        settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 
-        settings.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp");
-        settings.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return settings;
-    }
 }
