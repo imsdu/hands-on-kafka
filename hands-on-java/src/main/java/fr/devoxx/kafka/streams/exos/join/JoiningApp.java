@@ -31,8 +31,8 @@ public class JoiningApp {
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put("PojoJsonSerializer", GitMessage.class);
+        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>(GitMessage.class.getName());
+        serdeProps.put(GitMessage.class.getName(), GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);

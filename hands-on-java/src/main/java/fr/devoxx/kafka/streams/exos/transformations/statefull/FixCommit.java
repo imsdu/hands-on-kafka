@@ -26,39 +26,32 @@ public class FixCommit {
 
     public static void main(String[] args) {
 
-        // Create an instance of StreamsConfig from the Properties instance
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
+
+
         final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
+        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>(GitMessage.class.getName());
+        serdeProps.put(GitMessage.class.getName(), GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
         //START EXO
 
+        KStream<String, GitMessage> commits =
+                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
 
-        // building Kafka Streams Model
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
         // the source of the streaming analysis is the topic with git messages
-        KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.COMMITS_TOPIC);
-
-        KTable<String, Long> fixMessageByYears = messagesStream
-                .map((k,v) -> KeyValue.pair(v.getDate().split("-")[0] , v.getMessage()))
-                .filter((k,v) -> v != null && v.toLowerCase().contains(" fix "))
-                .groupByKey(stringSerde,stringSerde)
-                .count("countFix");
+        KTable<String, Long> fixMessageByYears = run(commits, stringSerde);
 
 
         //STOP EXO
 
         fixMessageByYears.print();
-
 
         System.out.println("Starting Kafka Streams "+NAME+" Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
@@ -66,6 +59,16 @@ public class FixCommit {
         kafkaStreams.start();
         System.out.println("Now started  "+NAME+"  Example");
 
+    }
+
+    public static KTable<String, Long> run( KStream<String, GitMessage> commits, Serde<String> stringSerde) {
+
+
+        return commits
+                .map((k,v) -> KeyValue.pair(v.getDate().split("-")[0] , v.getMessage()))
+                .filter((k,v) -> v != null && v.toLowerCase().contains(" fix "))
+                .groupByKey(stringSerde,stringSerde)
+                .count(NAME);
     }
 
 }

@@ -25,32 +25,45 @@ public class NbrCommitByContributorCategory {
 
     public static void main(String[] args) {
 
-        // Create an instance of StreamsConfig from the Properties instance
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
+
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<GithubCommit> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GithubCommit.class);
+        final PojoJsonSerializer<GithubCommit> jsonSerializer = new PojoJsonSerializer<>(GithubCommit.class.getName());
+        serdeProps.put(GithubCommit.class.getName(), GithubCommit.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GithubCommit> commitSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
+
+        KStream<String, GithubCommit> commits =
+                kStreamBuilder.stream(stringSerde, commitSerde, AppConfiguration.COMMITS_TOPIC);
 
 
         //START EXO
 
-        KStream<String, GithubCommit> messagesStream =
-                kStreamBuilder.stream(stringSerde, commitSerde, AppConfiguration.COMMITS_TOPIC);
+        run(commits, stringSerde, longSerde, commitSerde);
+        //STOP EXO
 
-        KTable<String, Long> commit = messagesStream
+
+        System.out.println("Starting Kafka Streams " + NAME + " Example");
+        KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
+        kafkaStreams.cleanUp();
+        kafkaStreams.start();
+        System.out.println("Now started  " + NAME + "  Example");
+
+    }
+
+    public static void run(KStream<String, GithubCommit> commits, Serde<String> stringSerde, Serde<Long> longSerde, Serde<GithubCommit> commitSerde) {
+
+        KTable<String, Long> commit = commits
                 .selectKey((k, v) -> v.getSha())
                 .map((k, v) -> {
                     String category = "OTHER";
-
                     String email = v.getCommit().getAuthor().getEmail();
                     if (email.contains("@lightbend.com"))
                         category = "LIGHTBEND";
@@ -60,19 +73,10 @@ public class NbrCommitByContributorCategory {
                     return KeyValue.pair(category, v);
                 })
                 .groupByKey()
-                .count("NBR_COMMIT");
+                .count(NAME);
 
 
         commit.to(stringSerde, longSerde, NAME);
-        //STOP EXO
-
-
-        System.out.println("Starting Kafka Streams "+NAME+" Example");
-        KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
-        kafkaStreams.cleanUp();
-        kafkaStreams.start();
-        System.out.println("Now started  "+NAME+"  Example");
-
     }
 
 

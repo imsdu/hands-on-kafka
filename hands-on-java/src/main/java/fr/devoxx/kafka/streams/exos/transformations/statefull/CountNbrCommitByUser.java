@@ -27,29 +27,25 @@ public class CountNbrCommitByUser {
 
         // Create an instance of StreamsConfig from the Properties instance
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
+
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Long> longSerde = Serdes.Long();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
+        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>(GitMessage.class.getName());
+        serdeProps.put(GitMessage.class.getName(), GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        //START EXO
-
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
-        KStream<String, GitMessage> messagesStream =
+        KStream<String, GitMessage> scala_gitlog =
                 kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
 
-        KTable<String, Long> messagesPerUser = messagesStream
-                .groupBy((key, message) ->
-                        message.getAuthor(), stringSerde, messageSerde)
-                .count(NAME);
+        //START EXO
 
-        messagesPerUser.to(stringSerde, longSerde, NAME);
+        KTable<String, Long> messagesPerUser = run(scala_gitlog, stringSerde, longSerde, messageSerde);
 
         //STOP EXO
 
@@ -64,6 +60,17 @@ public class CountNbrCommitByUser {
         kafkaStreams.start();
         System.out.println("Now started  "+NAME+"  Example");
 
+    }
+
+    public static KTable<String, Long> run(KStream<String, GitMessage> scala_gitlog, Serde<String> stringSerde, Serde<Long> longSerde, Serde<GitMessage> messageSerde) {
+
+        KTable<String, Long> messagesPerUser = scala_gitlog
+                .groupBy((key, message) ->
+                        message.getAuthor(), stringSerde, messageSerde)
+                .count(NAME);
+
+        messagesPerUser.to(stringSerde, longSerde, NAME);
+        return messagesPerUser;
     }
 
 

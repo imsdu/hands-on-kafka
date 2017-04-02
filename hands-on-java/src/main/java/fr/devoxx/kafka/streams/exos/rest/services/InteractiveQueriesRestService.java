@@ -1,10 +1,9 @@
 package fr.devoxx.kafka.streams.exos.rest.services;
 
-import fr.devoxx.kafka.streams.exos.rest.InteractiveQueriesExample;
+import fr.devoxx.kafka.streams.exos.rest.InteractiveQueries;
 import fr.devoxx.kafka.streams.exos.rest.utils.HostStoreInfo;
 import fr.devoxx.kafka.streams.exos.rest.utils.KeyValueBean;
 import fr.devoxx.kafka.streams.exos.transformations.statefull.CountNbrCommitByUser;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A simple REST proxy that runs embedded in the {@link InteractiveQueriesExample}. This is used to
+ * A simple REST proxy that runs embedded in the {@link InteractiveQueries}. This is used to
  * demonstrate how a developer can use the Interactive Queries APIs exposed by Kafka Streams to
  * locate and query the State Stores within a Kafka Streams Application.
  */

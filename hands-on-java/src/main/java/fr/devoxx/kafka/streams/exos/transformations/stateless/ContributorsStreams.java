@@ -27,31 +27,24 @@ public class ContributorsStreams {
 
     public static void main(String[] args) {
 
-        // Create an instance of StreamsConfig from the Properties instance
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
+
         final Serde<Double> duobleSerde = Serdes.Double();
         final Serde<String> stringSerde = Serdes.String();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<Contributor> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
+        final PojoJsonSerializer<Contributor> jsonSerializer = new PojoJsonSerializer<>(GitMessage.class.getName());
+        serdeProps.put(GitMessage.class.getName(), GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<Contributor> contributorSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
 
         //START EXO
 
-        KStream<String, Contributor> contributorStream =
-                kStreamBuilder.stream(stringSerde, contributorSerde, AppConfiguration.CONTRIBUTORS_TOPIC);
-
-        KStream<Double, Contributor> commit = contributorStream
-                .map((k, v) -> KeyValue.pair(v.getId(), v));
-
-
-        commit.to(duobleSerde, contributorSerde, NAME);
+        run(kStreamBuilder, duobleSerde, stringSerde, contributorSerde);
         //STOP EXO
 
         System.out.println("Starting Kafka Streams "+NAME+" Example");
@@ -60,6 +53,18 @@ public class ContributorsStreams {
         kafkaStreams.start();
         System.out.println("Now started  "+NAME+"  Example");
 
+    }
+
+    public static void run(KStreamBuilder kStreamBuilder, Serde<Double> duobleSerde, Serde<String> stringSerde, Serde<Contributor> contributorSerde) {
+        KStream<String, Contributor> contributorStream =
+                kStreamBuilder.stream(stringSerde, contributorSerde, AppConfiguration.CONTRIBUTORS_TOPIC);
+
+        KStream<Double, Contributor> commit = contributorStream
+                .map((k, v) ->
+                        KeyValue.pair(v.getId(), v));
+
+
+        commit.to(duobleSerde, contributorSerde, NAME);
     }
 
 

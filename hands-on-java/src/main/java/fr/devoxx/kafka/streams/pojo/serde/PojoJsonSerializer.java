@@ -2,7 +2,8 @@ package fr.devoxx.kafka.streams.pojo.serde;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.errors.SerializationException;
-import org.apache.kafka.common.serialization.*;
+import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Map;
 
@@ -10,10 +11,17 @@ import java.util.Map;
  * Created by sdumas on 18/03/17.
  */
 public class PojoJsonSerializer<T> implements Serializer<T>, Deserializer<T> {
-    public static String POJO_JSON_SERIALIZER = "PojoJsonSerializer";
 
+
+    public PojoJsonSerializer(String key)
+    {
+        this.key = key;
+    }
+
+
+   // public static String POJO_JSON_SERIALIZER = "PojoJsonSerializer";
+    public String key;
     private ObjectMapper objectMapper = new ObjectMapper();
-
     private Class<T> tClass;
 
     @Override
@@ -32,7 +40,7 @@ public class PojoJsonSerializer<T> implements Serializer<T>, Deserializer<T> {
 
     @Override
     public void configure(Map<String, ?> props, boolean b) {
-        tClass = (Class<T>) props.get(POJO_JSON_SERIALIZER);
+        tClass = (Class<T>) props.get(key);
     }
 
     @Override

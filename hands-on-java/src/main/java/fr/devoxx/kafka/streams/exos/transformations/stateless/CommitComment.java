@@ -25,31 +25,23 @@ public class CommitComment {
 
     public static void main(String[] args) {
 
-        // Create an instance of StreamsConfig from the Properties instance
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
+
         final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
+        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>(GitMessage.class.getName());
+        serdeProps.put(GitMessage.class.getName(), GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
 
         //START EXO
 
-        KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
-
-        KStream<String, String> commit = messagesStream
-                .map((k,v) -> KeyValue.pair(v.getHash(),v.getMessage()));
-
-
-        commit.to(stringSerde, stringSerde, NAME);
+        run(kStreamBuilder, stringSerde, messageSerde);
 
         //STOP EXO
 
@@ -60,6 +52,17 @@ public class CommitComment {
         kafkaStreams.cleanUp();
         kafkaStreams.start();
         System.out.println("Now started  "+NAME+"  Example");
+    }
+
+    public static void run(KStreamBuilder kStreamBuilder, Serde<String> stringSerde, Serde<GitMessage> messageSerde) {
+        KStream<String, GitMessage> messagesStream =
+                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
+
+        KStream<String, String> commit = messagesStream
+                .map((k,v) -> KeyValue.pair(v.getHash(),v.getMessage()));
+
+
+        commit.to(stringSerde, stringSerde, NAME);
     }
 
 

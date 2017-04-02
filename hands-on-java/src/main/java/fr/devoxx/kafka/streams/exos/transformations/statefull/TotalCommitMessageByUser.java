@@ -26,39 +26,26 @@ public class TotalCommitMessageByUser {
 
     public static void main(String[] args) {
 
-        // Create an instance of StreamsConfig from the Properties instance
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
+
         final Serde<String> stringSerde = Serdes.String();
         final Serde<Integer> intSerde = Serdes.Integer();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
+        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>(GitMessage.class.getName());
+        serdeProps.put(GitMessage.class.getName(), GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        //START EXO
 
-
-        // building Kafka Streams Model
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
-        // the source of the streaming analysis is the topic with git messages
-        KStream<String, GitMessage> messagesStream =
+        KStream<String, GitMessage> scala_gitlog =
                 kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
 
-        KTable<String, Integer> aggregate = messagesStream
-                .groupBy((k, v) -> v.getAuthor())
-                .aggregate(
-                        () -> 0,
-                        (aggKey, newValue, aggValue) -> aggValue + newValue.getMessage().length(),
-                        intSerde,
-                        "aggregationStore"
-                );
-
-        aggregate.to(stringSerde,intSerde,NAME);
-
+        //START EXO
+        run(scala_gitlog, stringSerde, intSerde, messageSerde);
 
         //STOP EXO
 
@@ -70,6 +57,21 @@ public class TotalCommitMessageByUser {
         kafkaStreams.cleanUp();
         kafkaStreams.start();
         System.out.println("Now started  "+NAME+"  Example");
+    }
+
+    public static void run( KStream<String, GitMessage> scala_gitlog , Serde<String> stringSerde, Serde<Integer> intSerde, Serde<GitMessage> messageSerde) {
+        // the source of the streaming analysis is the topic with git messages
+
+        KTable<String, Integer> aggregate = scala_gitlog
+                .groupBy((k, v) -> v.getAuthor())
+                .aggregate(
+                        () -> 0,
+                        (aggKey, newValue, aggValue) -> aggValue + newValue.getMessage().length(),
+                        intSerde,
+                        NAME
+                );
+
+        aggregate.to(stringSerde,intSerde,NAME);
     }
 
 }

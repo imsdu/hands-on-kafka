@@ -27,32 +27,23 @@ public class ContributorNoLightbend {
 
     public static void main(String[] args) {
 
-        // Create an instance of StreamsConfig from the Properties instance
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
+
         final Serde<String> stringSerde = Serdes.String();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<GithubCommit> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GithubCommit.class);
+        final PojoJsonSerializer<GithubCommit> jsonSerializer = new PojoJsonSerializer<>(GithubCommit.class.getName());
+        serdeProps.put(GithubCommit.class.getName(), GithubCommit.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GithubCommit> commitSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        KStreamBuilder kStreamBuilder = new KStreamBuilder();
 
         //START EXO
 
-        KStream<String, GithubCommit> messagesStream =
-                kStreamBuilder.stream(stringSerde, commitSerde, AppConfiguration.COMMITS_TOPIC);
-
-        KStream<String, GithubCommit> commit = messagesStream
-                .selectKey((k,v )-> v.getSha())
-                .filterNot((k,v) -> v.getCommit().getAuthor().getEmail().contains("@lightbend.com"));
-
-
-
-        commit.to(stringSerde, commitSerde, NAME);
+        run(kStreamBuilder, stringSerde, commitSerde);
         //STOP EXO
 
 
@@ -61,6 +52,18 @@ public class ContributorNoLightbend {
         kafkaStreams.cleanUp();
         kafkaStreams.start();
         System.out.println("Now started  "+NAME+"  Example");
+    }
+
+    public static void run(KStreamBuilder kStreamBuilder, Serde<String> stringSerde, Serde<GithubCommit> commitSerde) {
+        KStream<String, GithubCommit> messagesStream =
+                kStreamBuilder.stream(stringSerde, commitSerde, AppConfiguration.COMMITS_TOPIC);
+
+        KStream<String, GithubCommit> commit = messagesStream
+                .selectKey((k,v )-> v.getSha())
+                .filterNot((k,v) -> v.getCommit().getAuthor().getEmail().contains("@lightbend.com"));
+
+
+        commit.to(stringSerde, commitSerde, NAME);
     }
 
 
