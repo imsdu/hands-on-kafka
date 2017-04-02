@@ -1,5 +1,6 @@
 package fr.devoxx.kafka.streams.pojo;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -16,6 +17,14 @@ public class GithubCommit {
         this.url = url;
     }
 
+    public ArrayList<Parent> getParents() {
+        return parents;
+    }
+
+
+    public void setParents(Parent parent) {
+        this.parents.add(parent);
+    }
 
 
     public class Commit {
@@ -152,7 +161,6 @@ public class GithubCommit {
         private String received_events_url;
         private String type;
         private String site_admin;
-
 
 
         public String getLogin() {
@@ -292,36 +300,36 @@ public class GithubCommit {
         }
     }
 
-   public class Parent {
+    public class Parent {
         private String url;
         private String sha;
         private String html_url;
 
 
-       public String getUrl() {
-           return url;
-       }
+        public String getUrl() {
+            return url;
+        }
 
-       public void setUrl(String url) {
-           this.url = url;
-       }
+        public void setUrl(String url) {
+            this.url = url;
+        }
 
-       public String getSha() {
-           return sha;
-       }
+        public String getSha() {
+            return sha;
+        }
 
-       public void setSha(String sha) {
-           this.sha = sha;
-       }
+        public void setSha(String sha) {
+            this.sha = sha;
+        }
 
-       public String getHtml_url() {
-           return html_url;
-       }
+        public String getHtml_url() {
+            return html_url;
+        }
 
-       public void setHtml_url(String html_url) {
-           this.html_url = html_url;
-       }
-   }
+        public void setHtml_url(String html_url) {
+            this.html_url = html_url;
+        }
+    }
 
 
     public class Committer {
@@ -483,8 +491,6 @@ public class GithubCommit {
     }
 
 
-
-
     private String url;
     private String html_url;
     private String comments_url;
@@ -504,6 +510,7 @@ public class GithubCommit {
     public void setComments_url(String comments_url) {
         this.comments_url = comments_url;
     }
+
     private String sha;
 
     private Commit commit;
@@ -513,6 +520,8 @@ public class GithubCommit {
     private Committer committer;
 
 
+    private ArrayList<Parent> parents = new ArrayList<Parent>();
+    ;
 
     public String getSha() {
         return sha;
