@@ -20,8 +20,8 @@ import java.util.Map;
  */
 public class CountNbrCommitByUser {
 
-    private static final String  NAME = "CountNbrCommitByUser";
-    private static final String APP_ID = AppUtils.appID(NAME);
+    public static final String  NAME = "CountNbrCommitByUser";
+    public static final String APP_ID = AppUtils.appID(NAME);
 
     public static void main(String[] args) {
 
@@ -47,7 +47,7 @@ public class CountNbrCommitByUser {
         KTable<String, Long> messagesPerUser = messagesStream
                 .groupBy((key, message) ->
                         message.getAuthor(), stringSerde, messageSerde)
-                .count("CountPerUser");
+                .count(NAME);
 
         messagesPerUser.to(stringSerde, longSerde, NAME);
 

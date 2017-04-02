@@ -1,23 +1,28 @@
 package fr.devoxx.kafka.streams.exos.rest;
 
+import fr.devoxx.kafka.conf.AppConfiguration;
+import fr.devoxx.kafka.streams.exos.rest.services.InteractiveQueriesRestService;
+import fr.devoxx.kafka.streams.exos.transformations.statefull.CountNbrCommitByUser;
+import fr.devoxx.kafka.streams.pojo.GitMessage;
+import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.KGroupedStream;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.KTable;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 
-public class WordCountInteractiveQueriesExample {
+public class InteractiveQueriesExample {
 
-    static final String TEXT_LINES_TOPIC = "TextLinesTopic";
+    //static final String TEXT_LINES_TOPIC = "TextLinesTopic";
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0 || args.length > 2) {
@@ -56,7 +61,7 @@ public class WordCountInteractiveQueriesExample {
         streams.start();
 
         // Start the Restful proxy for servicing remote access to state stores
-        final WordCountInteractiveQueriesRestService restService = startRestProxy(streams, port);
+        final InteractiveQueriesRestService restService = startRestProxy(streams, port);
 
         // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -70,32 +75,44 @@ public class WordCountInteractiveQueriesExample {
     }
 
 
-    static WordCountInteractiveQueriesRestService startRestProxy(final KafkaStreams streams, final int port)
+    static InteractiveQueriesRestService startRestProxy(final KafkaStreams streams, final int port)
             throws Exception {
-        final WordCountInteractiveQueriesRestService
-                wordCountInteractiveQueriesRestService = new WordCountInteractiveQueriesRestService(streams);
-        wordCountInteractiveQueriesRestService.start(port);
-        return wordCountInteractiveQueriesRestService;
+        final InteractiveQueriesRestService
+                interactiveQueriesRestService = new InteractiveQueriesRestService(streams);
+        interactiveQueriesRestService.start(port);
+        return interactiveQueriesRestService;
     }
 
     static KafkaStreams createStreams(final Properties streamsConfiguration) {
+        // Create an instance of StreamsConfig from the Properties instance
         final Serde<String> stringSerde = Serdes.String();
-        KStreamBuilder builder = new KStreamBuilder();
-        KStream<String, String>
-                textLines = builder.stream(stringSerde, stringSerde, TEXT_LINES_TOPIC);
+        final Serde<Long> longSerde = Serdes.Long();
 
-        final KGroupedStream<String, String> groupedByWord = textLines
-                .flatMapValues(value -> Arrays.asList(value.toLowerCase().split("\\W+")))
-                .groupBy((key, word) -> word, stringSerde, stringSerde);
+        Map<String, Object> serdeProps = new HashMap<>();
 
-        // Create a State Store for with the all time word count
-        groupedByWord.count("word-count");
+        final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
+        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
+        jsonSerializer.configure(serdeProps, false);
 
-        // Create a Windowed State Store that contains the word count for every
-        // 1 minute
-        groupedByWord.count(TimeWindows.of(60000), "windowed-word-count");
+        final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
-        return new KafkaStreams(builder, streamsConfiguration);
+        //START EXO
+
+        KStreamBuilder kStreamBuilder = new KStreamBuilder();
+        KStream<String, GitMessage> messagesStream =
+                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
+
+        KTable<String, Long> messagesPerUser = messagesStream
+                .groupBy((key, message) ->
+                        message.getAuthor(), stringSerde, messageSerde)
+                .count(CountNbrCommitByUser.NAME);
+
+        messagesPerUser.to(stringSerde, longSerde, CountNbrCommitByUser.NAME);
+
+        //STOP EXO
+
+
+        return new KafkaStreams(kStreamBuilder, streamsConfiguration);
     }
 
 }

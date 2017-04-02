@@ -32,5 +32,6 @@ Principally the value `URL_BASE :
 ## Querying local window stores -  Saleh
 
 ## Exposing the REST endpoints of your application - Cecilia
-- Exposing top 10 contributors with their informations (Confluent API)
-- Exposing top 10 contributors with their informations (Personnal REST API)
+- Exposing  data from Stateful exercices
+- Exposing top 10 contributors  (Confluent API)
+- Use you favorite RPC/REST library/framework to expose !

@@ -3,13 +3,13 @@ package fr.devoxx.kafka.streams.exos.rest.utils;
 /**
  * Created by fred on 01/04/2017.
  */
-import fr.devoxx.kafka.streams.exos.rest.WordCountInteractiveQueriesRestService;
+import fr.devoxx.kafka.streams.exos.rest.services.InteractiveQueriesRestService;
 
 import java.util.Objects;
 
 /**
- * A simple bean used by {@link WordCountInteractiveQueriesRestService} when responding to
- * {@link WordCountInteractiveQueriesRestService#byKey(String, String)}.
+ * A simple bean used by {@link InteractiveQueriesRestService} when responding to
+ * {@link InteractiveQueriesRestService#byKey(String, String)}.
  *
  * We use this JavaBean based approach as it fits nicely with JSON serialization provided by
  * jax-rs/jersey

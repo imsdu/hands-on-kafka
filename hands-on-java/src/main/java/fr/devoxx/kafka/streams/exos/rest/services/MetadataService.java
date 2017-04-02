@@ -1,8 +1,9 @@
-package fr.devoxx.kafka.streams.exos.rest.utils;
+package fr.devoxx.kafka.streams.exos.rest.services;
 
 /**
  * Created by fred on 01/04/2017.
  */
+import fr.devoxx.kafka.streams.exos.rest.utils.HostStoreInfo;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.state.StreamsMetadata;
