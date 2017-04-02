@@ -50,28 +50,34 @@ public class TotalCommitMessageByUser {
         //STOP EXO
 
 
-
-
-        System.out.println("Starting Kafka Streams "+NAME+" Example");
+        System.out.println("Starting Kafka Streams " + NAME + " Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started  "+NAME+"  Example");
+        System.out.println("Now started  " + NAME + "  Example");
     }
 
-    public static void run( KStream<String, GitMessage> scala_gitlog , Serde<String> stringSerde, Serde<Integer> intSerde, Serde<GitMessage> messageSerde) {
+    public static void run(KStream<String, GitMessage> scala_gitlog, Serde<String> stringSerde, Serde<Integer> intSerde, Serde<GitMessage> messageSerde) {
         // the source of the streaming analysis is the topic with git messages
 
         KTable<String, Integer> aggregate = scala_gitlog
-                .groupBy((k, v) -> v.getAuthor())
+                .groupBy((k, v) -> v.getAuthor(), stringSerde, messageSerde)
                 .aggregate(
                         () -> 0,
-                        (aggKey, newValue, aggValue) -> aggValue + newValue.getMessage().length(),
+                        (aggKey, newValue, aggValue) -> {
+
+                            if (newValue.getMessage() != null) {
+                                return aggValue + newValue.getMessage().length();
+
+                            } else {
+                                return aggValue;
+                            }
+                        },
                         intSerde,
                         NAME
                 );
 
-        aggregate.to(stringSerde,intSerde,NAME);
+        aggregate.to(stringSerde, intSerde, NAME);
     }
 
 }
