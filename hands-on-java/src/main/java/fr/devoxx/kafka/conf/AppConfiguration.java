@@ -10,7 +10,12 @@ import java.util.Properties;
  */
 public class AppConfiguration {
 
+
+    //<!> CHANGE ME PLEASE <!>
     public static String URL_BASE = "192.168.99.100"; //"localhost"
+
+
+
     public static String BOOTSTRAP_SERVERS_CONFIG = URL_BASE + ":9092";
     public static String SCHEMA_REGISTRY = "http://" + URL_BASE + ":8081";
     public static String STATE_DIR_CONFIG = "/tmp";
@@ -19,7 +24,9 @@ public class AppConfiguration {
     public static String USERS_TOPIC = "users";
     public static String SCALA_GITLOG_TOPIC = "scala-gitlog";
     public static String CONTRIBUTORS_TOPIC = "contributors";
+    public static String COMMITS_TOPIC = "commits";
     public static String ALL_USERS_TOPIC = "all-users";
+
     public static String MESSAGESPERUSER = "MessagesPerUser";
 
 
