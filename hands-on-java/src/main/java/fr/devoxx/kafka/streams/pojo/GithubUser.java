@@ -112,4 +112,26 @@ public class GithubUser {
     public void setUpdated_at(Date updated_at) {
         this.updated_at = updated_at;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GithubUser that = (GithubUser) o;
+
+        return login != null ? login.equals(that.login) : that.login == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return login != null ? login.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "GithubUser{" +
+                "login='" + login + '\'' +
+                '}';
+    }
 }
