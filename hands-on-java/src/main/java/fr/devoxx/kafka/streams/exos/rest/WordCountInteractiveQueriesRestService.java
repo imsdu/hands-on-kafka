@@ -1,8 +1,8 @@
-package fr.devoxx.kafka.exos.rest;
+package fr.devoxx.kafka.streams.exos.rest;
 
-import fr.devoxx.kafka.exos.rest.utils.HostStoreInfo;
-import fr.devoxx.kafka.exos.rest.utils.KeyValueBean;
-import fr.devoxx.kafka.exos.rest.utils.MetadataService;
+import fr.devoxx.kafka.streams.exos.rest.utils.HostStoreInfo;
+import fr.devoxx.kafka.streams.exos.rest.utils.KeyValueBean;
+import fr.devoxx.kafka.streams.exos.rest.utils.MetadataService;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;

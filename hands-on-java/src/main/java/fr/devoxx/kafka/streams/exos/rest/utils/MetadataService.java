@@ -1,4 +1,4 @@
-package fr.devoxx.kafka.exos.rest.utils;
+package fr.devoxx.kafka.streams.exos.rest.utils;
 
 /**
  * Created by fred on 01/04/2017.
