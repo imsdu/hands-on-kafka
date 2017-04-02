@@ -72,7 +72,7 @@ public class NbrCommitByContributorCategory {
 
                     return KeyValue.pair(category, v);
                 })
-                .groupByKey()
+                .groupByKey(stringSerde,commitSerde)
                 .count(NAME);
 
 
