@@ -21,18 +21,19 @@ import java.util.Map;
  */
 public class CommitContributor {
 
-    private static final String APP_ID = AppUtils.appID("CommitContributor");
+    private static final String NAME = "CommitContributor";
+    private static final String APP_ID = AppUtils.appID(NAME);
+
     public static void main(String[] args) {
 
         // Create an instance of StreamsConfig from the Properties instance
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
         final Serde<String> stringSerde = Serdes.String();
-        final Serde<Long> longSerde = Serdes.Long();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
         final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put("PojoJsonSerializer", GitMessage.class);
+        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
@@ -48,14 +49,15 @@ public class CommitContributor {
                 .map((k,v) -> KeyValue.pair(v.getHash(),v.getAuthor()));
 
 
-        commit.to(stringSerde, stringSerde, "CommitComment");
+        commit.to(stringSerde, stringSerde, NAME);
         //STOP EXO
 
-        System.out.println("Starting Kafka Streams Gitlog Example");
+
+        System.out.println("Starting Kafka Streams "+NAME+" Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started Gitlog Example");
+        System.out.println("Now started  "+NAME+"  Example");
 
     }
 

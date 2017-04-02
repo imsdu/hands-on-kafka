@@ -27,7 +27,6 @@ public class AppConfiguration {
     public static String COMMITS_TOPIC = "commits";
     public static String ALL_USERS_TOPIC = "all-users";
 
-    public static String MESSAGESPERUSER = "MessagesPerUser";
 
 
     public static Properties getProperties(String APP_ID) {

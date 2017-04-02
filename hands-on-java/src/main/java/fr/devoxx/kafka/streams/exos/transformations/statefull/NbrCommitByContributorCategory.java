@@ -20,8 +20,8 @@ import java.util.Map;
  * Hands-on kafka streams Devoxx 2017
  */
 public class NbrCommitByContributorCategory {
-
-    private static final String APP_ID = AppUtils.appID("NbrCommitByContributorCategory");
+    private static final String NAME = "NbrCommitByContributorCategory";
+    private static final String APP_ID = AppUtils.appID(NAME);
 
     public static void main(String[] args) {
 
@@ -33,7 +33,7 @@ public class NbrCommitByContributorCategory {
         Map<String, Object> serdeProps = new HashMap<>();
 
         final PojoJsonSerializer<GithubCommit> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put("PojoJsonSerializer", GithubCommit.class);
+        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GithubCommit.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GithubCommit> commitSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
@@ -63,14 +63,15 @@ public class NbrCommitByContributorCategory {
                 .count("NBR_COMMIT");
 
 
-        commit.to(stringSerde, longSerde, "NbrCommitByContributorCategory");
+        commit.to(stringSerde, longSerde, NAME);
         //STOP EXO
 
-        System.out.println("Starting Kafka Streams Gitlog Example");
+
+        System.out.println("Starting Kafka Streams "+NAME+" Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started Gitlog Example");
+        System.out.println("Now started  "+NAME+"  Example");
 
     }
 

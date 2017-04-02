@@ -21,7 +21,9 @@ import java.util.Map;
  */
 public class ContributorsStreams {
 
-    private static final String APP_ID = AppUtils.appID("ContributorsStreams");
+
+    private static final String NAME = "ContributorsStreams";
+    private static final String APP_ID = AppUtils.appID(NAME);
 
     public static void main(String[] args) {
 
@@ -33,7 +35,7 @@ public class ContributorsStreams {
         Map<String, Object> serdeProps = new HashMap<>();
 
         final PojoJsonSerializer<Contributor> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put("PojoJsonSerializer", GitMessage.class);
+        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<Contributor> contributorSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
@@ -49,14 +51,14 @@ public class ContributorsStreams {
                 .map((k, v) -> KeyValue.pair(v.getId(), v));
 
 
-        commit.to(duobleSerde, contributorSerde, "ContributorStreams");
+        commit.to(duobleSerde, contributorSerde, NAME);
         //STOP EXO
 
-        System.out.println("Starting Kafka Streams Gitlog Example");
+        System.out.println("Starting Kafka Streams "+NAME+" Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started Gitlog Example");
+        System.out.println("Now started  "+NAME+"  Example");
 
     }
 

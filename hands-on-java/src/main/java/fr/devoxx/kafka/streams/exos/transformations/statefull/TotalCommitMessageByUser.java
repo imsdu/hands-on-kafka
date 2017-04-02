@@ -20,7 +20,9 @@ import java.util.Map;
  */
 public class TotalCommitMessageByUser {
 
-    private static final String APP_ID = AppUtils.appID("TotalCommitMessageByUser");
+
+    private static final String NAME = "TotalCommitMessageByUser";
+    private static final String APP_ID = AppUtils.appID(NAME);
 
     public static void main(String[] args) {
 
@@ -32,7 +34,7 @@ public class TotalCommitMessageByUser {
         Map<String, Object> serdeProps = new HashMap<>();
 
         final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put("PojoJsonSerializer", GitMessage.class);
+        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
@@ -44,7 +46,7 @@ public class TotalCommitMessageByUser {
         KStreamBuilder kStreamBuilder = new KStreamBuilder();
         // the source of the streaming analysis is the topic with git messages
         KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, "scala-gitlog");
+                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
 
         KTable<String, Integer> aggregate = messagesStream
                 .groupBy((k, v) -> v.getAuthor())
@@ -55,18 +57,19 @@ public class TotalCommitMessageByUser {
                         "aggregationStore"
                 );
 
+        aggregate.to(stringSerde,intSerde,NAME);
+
 
         //STOP EXO
 
-        aggregate.print();
 
 
-        System.out.println("Starting Kafka Streams Gitlog Example");
+
+        System.out.println("Starting Kafka Streams "+NAME+" Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started Gitlog Example");
-
+        System.out.println("Now started  "+NAME+"  Example");
     }
 
 }

@@ -10,6 +10,7 @@ import java.util.Map;
  * Created by sdumas on 18/03/17.
  */
 public class PojoJsonSerializer<T> implements Serializer<T>, Deserializer<T> {
+    public static String POJO_JSON_SERIALIZER = "PojoJsonSerializer";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -31,7 +32,7 @@ public class PojoJsonSerializer<T> implements Serializer<T>, Deserializer<T> {
 
     @Override
     public void configure(Map<String, ?> props, boolean b) {
-        tClass = (Class<T>) props.get("PojoJsonSerializer");
+        tClass = (Class<T>) props.get(POJO_JSON_SERIALIZER);
     }
 
     @Override

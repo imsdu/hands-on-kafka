@@ -20,7 +20,8 @@ import java.util.Map;
  */
 public class CommitComment {
 
-    private static final String APP_ID = AppUtils.appID("CommitComment");
+    private static final String NAME = "CommitComment";
+    private static final String APP_ID = AppUtils.appID(NAME);
 
     public static void main(String[] args) {
 
@@ -32,7 +33,7 @@ public class CommitComment {
         Map<String, Object> serdeProps = new HashMap<>();
 
         final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put("PojoJsonSerializer", GitMessage.class);
+        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
@@ -48,17 +49,17 @@ public class CommitComment {
                 .map((k,v) -> KeyValue.pair(v.getHash(),v.getMessage()));
 
 
-        commit.to(stringSerde, stringSerde, "CommitComment");
+        commit.to(stringSerde, stringSerde, NAME);
 
         //STOP EXO
 
 
-        System.out.println("Starting Kafka Streams Gitlog Example");
+
+        System.out.println("Starting Kafka Streams "+NAME+" Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started Gitlog Example");
-
+        System.out.println("Now started  "+NAME+"  Example");
     }
 
 

@@ -20,7 +20,8 @@ import java.util.Map;
  */
 public class BranchCommit {
 
-    private static final String APP_ID = AppUtils.appID("BranchCommit");
+    private static final String NAME = "BranchCommit";
+    private static final String APP_ID = AppUtils.appID(NAME);
 
     public static void main(String[] args) {
 
@@ -31,7 +32,7 @@ public class BranchCommit {
         Map<String, Object> serdeProps = new HashMap<>();
 
         final PojoJsonSerializer<GitMessage> jsonSerializer = new PojoJsonSerializer<>();
-        serdeProps.put("PojoJsonSerializer", GitMessage.class);
+        serdeProps.put(PojoJsonSerializer.POJO_JSON_SERIALIZER, GitMessage.class);
         jsonSerializer.configure(serdeProps, false);
 
         final Serde<GitMessage> messageSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
@@ -44,24 +45,24 @@ public class BranchCommit {
                 kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC)
                         .map((k, v) -> KeyValue.pair(v.getHash(), v));
 
-        KStream<String, GitMessage>[] commit = messagesStream
-                .branch(
+        KStream<String, GitMessage>[] commit = messagesStream.branch(
                         (key, value) -> value.getMessage().toLowerCase().contains("fix"),
                         (key, value) -> !value.getMessage().toLowerCase().contains("fix")
                 );
 
 
-        commit[0].to(stringSerde, messageSerde, "CommitFixStream");
-        commit[1].to(stringSerde, messageSerde, "CommitFeatureStream");
+        commit[0].to(stringSerde, messageSerde, NAME+"_FIX");
+        commit[1].to(stringSerde, messageSerde, NAME+"_FEAT");
 
         //STOP EXO
 
 
-        System.out.println("Starting Kafka Streams Gitlog Example");
+
+        System.out.println("Starting Kafka Streams "+NAME+" Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started Gitlog Example");
+        System.out.println("Now started  "+NAME+"  Example");
 
     }
 
