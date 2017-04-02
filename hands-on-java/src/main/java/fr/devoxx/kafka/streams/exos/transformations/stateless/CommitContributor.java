@@ -1,8 +1,8 @@
 package fr.devoxx.kafka.streams.exos.transformations.stateless;
 
+import fr.devoxx.kafka.conf.AppConfiguration;
 import fr.devoxx.kafka.streams.pojo.GitMessage;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
-import fr.devoxx.kafka.conf.AppConfiguration;
 import fr.devoxx.kafka.utils.AppUtils;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -11,7 +11,6 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
-import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.HashMap;
 import java.util.Map;

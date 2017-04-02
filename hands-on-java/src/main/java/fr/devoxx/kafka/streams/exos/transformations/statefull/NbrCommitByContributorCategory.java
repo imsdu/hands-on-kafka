@@ -47,6 +47,7 @@ public class NbrCommitByContributorCategory {
         //START EXO
 
         run(commits, stringSerde, longSerde, commitSerde);
+
         //STOP EXO
 
 

@@ -45,6 +45,7 @@ public class TotalCommitMessageByUser {
                 kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
 
         //START EXO
+
         run(scala_gitlog, stringSerde, intSerde, messageSerde);
 
         //STOP EXO
@@ -58,7 +59,6 @@ public class TotalCommitMessageByUser {
     }
 
     public static void run(KStream<String, GitMessage> scala_gitlog, Serde<String> stringSerde, Serde<Integer> intSerde, Serde<GitMessage> messageSerde) {
-        // the source of the streaming analysis is the topic with git messages
 
         KTable<String, Integer> aggregate = scala_gitlog
                 .groupBy((k, v) -> v.getAuthor(), stringSerde, messageSerde)

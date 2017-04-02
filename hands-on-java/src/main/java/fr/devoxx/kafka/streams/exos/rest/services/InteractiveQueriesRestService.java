@@ -46,19 +46,23 @@ public class InteractiveQueriesRestService {
 
 
         String storeName = CountNbrCommitByUser.NAME;
-        // Lookup the WindowStore with the provided storeName
+
         final ReadOnlyKeyValueStore<String, Long> store = streams.store(storeName,
                 QueryableStoreTypes.<String, Long>keyValueStore());
         if (store == null) {
             throw new NotFoundException();
         }
+
+        //START EXO
+
         KeyValueIterator<String, Long> results = store.all();
         final List<KeyValueBean> keyValueBeans = new ArrayList<>();
         while (results.hasNext()) {
             final KeyValue<String,Long> next = results.next();
-            // convert the result to have the window time and the key (for display purposes)
             keyValueBeans.add(new KeyValueBean( next.key, next.value));
         }
+
+        //STOP EXO
 
         return keyValueBeans;
 
