@@ -1,14 +1,12 @@
 package fr.devoxx.kafka.streams.exos.transformations.stateless;
 
 import fr.devoxx.kafka.conf.AppConfiguration;
-import fr.devoxx.kafka.streams.pojo.Contributor;
-import fr.devoxx.kafka.streams.pojo.GitMessage;
+import fr.devoxx.kafka.streams.pojo.GithubCommit;
 import fr.devoxx.kafka.streams.pojo.serde.PojoJsonSerializer;
 import fr.devoxx.kafka.utils.AppUtils;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -19,10 +17,10 @@ import java.util.Map;
 /**
  * Hands-on kafka streams Devoxx 2017
  */
-public class ContributorsStreams {
+public class FixStreams {
 
 
-    private static final String NAME = "ContributorsStreams";
+    private static final String NAME = "FixStreams";
     private static final String APP_ID = AppUtils.appID(NAME);
 
     public static void main(String[] args) {
@@ -30,21 +28,23 @@ public class ContributorsStreams {
         KStreamBuilder kStreamBuilder = new KStreamBuilder();
         StreamsConfig config = new StreamsConfig(AppConfiguration.getProperties(APP_ID));
 
-        final Serde<Integer> integerSerde = Serdes.Integer();
         final Serde<String> stringSerde = Serdes.String();
 
         Map<String, Object> serdeProps = new HashMap<>();
 
-        final PojoJsonSerializer<Contributor> jsonSerializer = new PojoJsonSerializer<>(Contributor.class.getName());
-        serdeProps.put(Contributor.class.getName(), Contributor.class);
+        final PojoJsonSerializer<GithubCommit> jsonSerializer = new PojoJsonSerializer<>(GithubCommit.class.getName());
+        serdeProps.put(GithubCommit.class.getName(), GithubCommit.class);
         jsonSerializer.configure(serdeProps, false);
 
-        final Serde<Contributor> contributorSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
+        final Serde<GithubCommit> githubCommitSerde = Serdes.serdeFrom(jsonSerializer, jsonSerializer);
 
+        KStream<String, GithubCommit> contributorStream =
+                kStreamBuilder.stream(stringSerde, githubCommitSerde, AppConfiguration.COMMITS_TOPIC);
 
         //START EXO
 
-        run(kStreamBuilder, integerSerde, stringSerde, contributorSerde);
+
+        run(contributorStream,  stringSerde, githubCommitSerde);
         //STOP EXO
 
         System.out.println("Starting Kafka Streams "+NAME+" Example");
@@ -55,16 +55,15 @@ public class ContributorsStreams {
 
     }
 
-    public static void run(KStreamBuilder kStreamBuilder, Serde<Integer> integerSerde, Serde<String> stringSerde, Serde<Contributor> contributorSerde) {
-        KStream<String, Contributor> contributorStream =
-                kStreamBuilder.stream(stringSerde, contributorSerde, AppConfiguration.CONTRIBUTORS_TOPIC);
-
-        KStream<Integer, Contributor> commit = contributorStream
-                .map((k, v) ->
-                        KeyValue.pair(v.getId(), v));
+    public static void run( KStream<String, GithubCommit> contributorStream, Serde<String> stringSerde, Serde<GithubCommit> githubCommitSerde) {
 
 
-        commit.to(integerSerde, contributorSerde, NAME);
+        KStream<String, GithubCommit> commit = contributorStream
+                .selectKey((k, v) -> v.getSha())
+        .filter((k,v)-> v.getCommit().getMessage().toLowerCase().contains("fix "));
+
+        commit.print();
+        commit.to(stringSerde, githubCommitSerde, NAME);
     }
 
 
