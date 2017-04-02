@@ -45,12 +45,11 @@ public class BranchCommit {
         //STOP EXO
 
 
-
-        System.out.println("Starting Kafka Streams "+NAME+" Example");
+        System.out.println("Starting Kafka Streams " + NAME + " Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started  "+NAME+"  Example");
+        System.out.println("Now started  " + NAME + "  Example");
 
     }
 
@@ -60,13 +59,13 @@ public class BranchCommit {
                         .map((k, v) -> KeyValue.pair(v.getHash(), v));
 
         KStream<String, GitMessage>[] commit = messagesStream.branch(
-                        (key, value) -> value.getMessage().toLowerCase().contains("fix"),
-                        (key, value) -> !value.getMessage().toLowerCase().contains("fix")
-                );
+                (key, value) -> value.getMessage() != null && value.getMessage().toLowerCase().contains("fix"),
+                (key, value) -> value.getMessage() != null && !value.getMessage().toLowerCase().contains("fix")
+        );
 
 
-        commit[0].to(stringSerde, messageSerde, NAME+"_FIX");
-        commit[1].to(stringSerde, messageSerde, NAME+"_FEAT");
+        commit[0].to(stringSerde, messageSerde, NAME + "_FIX");
+        commit[1].to(stringSerde, messageSerde, NAME + "_FEAT");
     }
 
 
