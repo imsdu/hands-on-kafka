@@ -1,9 +1,15 @@
 package fr.devoxx.kafka.streams.exos.rest.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.devoxx.kafka.streams.exos.rest.InteractiveQueries;
 import fr.devoxx.kafka.streams.exos.rest.utils.HostStoreInfo;
 import fr.devoxx.kafka.streams.exos.rest.utils.KeyValueBean;
 import fr.devoxx.kafka.streams.exos.transformations.statefull.CountNbrCommitByUser;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -16,10 +22,15 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A simple REST proxy that runs embedded in the {@link InteractiveQueries}. This is used to
@@ -32,10 +43,12 @@ public class InteractiveQueriesRestService {
     private final KafkaStreams streams;
     private final MetadataService metadataService;
     private Server jettyServer;
+    private String host;
 
-    public InteractiveQueriesRestService(final KafkaStreams streams) {
+    public InteractiveQueriesRestService(final KafkaStreams streams, String host) {
         this.streams = streams;
         this.metadataService = new MetadataService(streams);
+        this.host = host;
     }
 
 
@@ -46,28 +59,47 @@ public class InteractiveQueriesRestService {
 
 
         String storeName = CountNbrCommitByUser.NAME;
-
-        final ReadOnlyKeyValueStore<String, Long> store = streams.store(storeName,
-                QueryableStoreTypes.<String, Long>keyValueStore());
-        if (store == null) {
-            throw new NotFoundException();
-        }
-
-        //START EXO
-
-        KeyValueIterator<String, Long> results = store.all();
         final List<KeyValueBean> keyValueBeans = new ArrayList<>();
-        while (results.hasNext()) {
-            final KeyValue<String,Long> next = results.next();
-            keyValueBeans.add(new KeyValueBean( next.key, next.value));
-        }
 
-        //STOP EXO
+        streams.allMetadataForStore(CountNbrCommitByUser.NAME).forEach(metadata -> {
+
+            String comppleteHost = metadata.host() + ":" + metadata.port();
+
+            if (Objects.equals(comppleteHost, host)) {
+                final ReadOnlyKeyValueStore<String, Long> store = streams.store(storeName, QueryableStoreTypes.<String, Long>keyValueStore());
+                if (store == null) {
+                    throw new NotFoundException();
+                }
+
+                KeyValueIterator<String, Long> results = store.all();
+                while (results.hasNext()) {
+                    final KeyValue<String, Long> next = results.next();
+                    keyValueBeans.add(new KeyValueBean(next.key, next.value));
+                }
+
+            } else {
+
+                CloseableHttpClient httpclient = HttpClients.createDefault();
+                String url = "http://" + comppleteHost + "/state/contributors";
+                HttpGet httpGet = new HttpGet(url);
+                try {
+                    CloseableHttpResponse response = httpclient.execute(httpGet);
+                    String jsonInput = EntityUtils.toString(response.getEntity());
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<KeyValueBean> responses = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, KeyValueBean.class));
+                    keyValueBeans.addAll(responses);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
+
 
         return keyValueBeans;
 
     }
-
 
 
     /**
@@ -99,7 +131,7 @@ public class InteractiveQueriesRestService {
      *
      * @throws Exception
      */
-   public  void stop() throws Exception {
+    public void stop() throws Exception {
         if (jettyServer != null) {
             jettyServer.stop();
         }
@@ -111,7 +143,6 @@ public class InteractiveQueriesRestService {
     public List<HostStoreInfo> streamsMetadata() {
         return metadataService.streamsMetadata();
     }
-
 
 
 }

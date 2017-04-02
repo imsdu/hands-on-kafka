@@ -31,7 +31,7 @@ public class InteractiveQueries {
         if (args.length == 0 || args.length > 2) {
             throw new IllegalArgumentException("usage: ... <portForRestEndPoint> [<bootstrap.servers> (optional)]");
         }
-        final int port = Integer.valueOf(args[0]);
+        final String host = args[0];
         final String bootstrapServers = args.length > 1 ? args[1] : "localhost:9092";
 
         Properties streamsConfiguration = new Properties();
@@ -42,7 +42,7 @@ public class InteractiveQueries {
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         // Provide the details of our embedded http service that we'll use to connect to this streams
         // instance and discover locations of stores.
-        streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, "localhost:" + port);
+        streamsConfiguration.put(StreamsConfig.APPLICATION_SERVER_CONFIG, host);
         final File example = Files.createTempDirectory(new File("/tmp").toPath(), "example").toFile();
         streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, example.getPath());
 
@@ -52,7 +52,7 @@ public class InteractiveQueries {
 
         streams.start();
 
-        final InteractiveQueriesRestService restService = startRestProxy(streams, port);
+        final InteractiveQueriesRestService restService = startRestProxy(streams, host);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
@@ -65,10 +65,11 @@ public class InteractiveQueries {
     }
 
 
-    static InteractiveQueriesRestService startRestProxy(final KafkaStreams streams, final int port)
+    static InteractiveQueriesRestService startRestProxy(final KafkaStreams streams, final String host)
             throws Exception {
         final InteractiveQueriesRestService
-                interactiveQueriesRestService = new InteractiveQueriesRestService(streams);
+                interactiveQueriesRestService = new InteractiveQueriesRestService(streams, host);
+        Integer port = Integer.valueOf(host.split(":")[1]);
         interactiveQueriesRestService.start(port);
         return interactiveQueriesRestService;
     }
