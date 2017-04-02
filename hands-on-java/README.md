@@ -32,6 +32,6 @@ Principally the value `URL_BASE :
 ## Querying local window stores -  Saleh
 
 ## Exposing the REST endpoints of your application - Cecilia
-- Exposing  state off Stateful exercices
+- Exposing  state off Stateful exercices :  RUN InteractiveQueries with argumente `localhost:9000 192.168.99.100:9092` for mac or `localhost:9000 localhost:9092` for linux
 - Exposing top 10 contributors  (Confluent API)
 - Use you favorite RPC/REST library/framework to expose !
