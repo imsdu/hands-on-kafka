@@ -56,7 +56,13 @@ public class TableToTableJoinApp {
         final KTable<String, GithubCommit> lastCommitByUser = kStreamBuilder.stream(stringSerde, commitSerde, "commits")
                 .filter((key, commit) -> commit != null && commit.getAuthor() != null)
                 .groupBy((key, commit) -> commit.getAuthor().getLogin(), stringSerde, commitSerde)
-                .reduce((v1, v2) -> v2, "LastCommitTable");
+                .reduce((v1, v2) -> {
+                            if (v1.getCommit().getAuthor().getDate().before(v2.getCommit().getAuthor().getDate())) {
+                                return v1;
+                            } else {
+                                return v2;
+                            }
+        }, "LastCommitTable");
 
         // Join !
         final KTable<String, String> lastCommits = lastCommitByUser.join(userTable,
