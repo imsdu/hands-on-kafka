@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.devoxx.kafka.streams.exos.rest.InteractiveQueries;
 import fr.devoxx.kafka.streams.exos.rest.utils.HostStoreInfo;
 import fr.devoxx.kafka.streams.exos.rest.utils.KeyValueBean;
+import fr.devoxx.kafka.streams.exos.store.WindowedLocalKVStore;
 import fr.devoxx.kafka.streams.exos.transformations.statefull.CountNbrCommitByUser;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -12,9 +13,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.state.KeyValueIterator;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -22,10 +21,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,57 +48,84 @@ public class InteractiveQueriesRestService {
     }
 
 
-    @GET
-    @Path("/contributors")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<KeyValueBean> CountNbrCommitByUser() {
+  @GET
+  @Path("/contributors/{storeName}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<KeyValueBean> CountNbrCommitByUser(@PathParam("storeName") final String storeName) {
 
 
-        String storeName = CountNbrCommitByUser.NAME;
-        final List<KeyValueBean> keyValueBeans = new ArrayList<>();
+    final List<KeyValueBean> keyValueBeans = new ArrayList<>();
 
-        streams.allMetadataForStore(CountNbrCommitByUser.NAME).forEach(metadata -> {
+    streams.allMetadataForStore(CountNbrCommitByUser.NAME).forEach(metadata -> {
 
-            String comppleteHost = metadata.host() + ":" + metadata.port();
+      String comppleteHost = metadata.host() + ":" + metadata.port();
 
-            if (Objects.equals(comppleteHost, host)) {
-                final ReadOnlyKeyValueStore<String, Long> store = streams.store(storeName, QueryableStoreTypes.<String, Long>keyValueStore());
-                if (store == null) {
-                    throw new NotFoundException();
-                }
+      if (Objects.equals(comppleteHost, host)) {
+        final ReadOnlyKeyValueStore<String, Long> store = streams.store(storeName, QueryableStoreTypes.<String, Long>keyValueStore());
+        if (store == null) {
+          throw new NotFoundException();
+        }
 
-                KeyValueIterator<String, Long> results = store.all();
-                while (results.hasNext()) {
-                    final KeyValue<String, Long> next = results.next();
-                    keyValueBeans.add(new KeyValueBean(next.key, next.value));
-                }
+        KeyValueIterator<String, Long> results = store.all();
+        while (results.hasNext()) {
+          final KeyValue<String, Long> next = results.next();
+          keyValueBeans.add(new KeyValueBean(next.key, next.value));
+        }
 
-            } else {
+      } else {
 
-                CloseableHttpClient httpclient = HttpClients.createDefault();
-                String url = "http://" + comppleteHost + "/state/contributors";
-                HttpGet httpGet = new HttpGet(url);
-                try {
-                    CloseableHttpResponse response = httpclient.execute(httpGet);
-                    String jsonInput = EntityUtils.toString(response.getEntity());
-                    ObjectMapper mapper = new ObjectMapper();
-                    List<KeyValueBean> responses = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, KeyValueBean.class));
-                    keyValueBeans.addAll(responses);
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        String url = "http://" + comppleteHost + "/state/contributors";
+        HttpGet httpGet = new HttpGet(url);
+        try {
+          CloseableHttpResponse response = httpclient.execute(httpGet);
+          String jsonInput = EntityUtils.toString(response.getEntity());
+          ObjectMapper mapper = new ObjectMapper();
+          List<KeyValueBean> responses = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, KeyValueBean.class));
+          keyValueBeans.addAll(responses);
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
 
-        });
+    });
 
 
-        return keyValueBeans;
+    return keyValueBeans;
 
+  }
+
+  @GET
+  @Path("/windowed/{storeName}/{author}/{from}/{to}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<KeyValueBean> CountWindowedCommitByUser(@PathParam("storeName") final String storeName,
+                                                      @PathParam("author") final String author,
+                                                      @PathParam("from") final Long from,
+                                                      @PathParam("to") final Long to) {
+
+
+    final List<KeyValueBean> windowResults = new ArrayList<>();
+
+    final ReadOnlyWindowStore<String, Long> windowStore = streams.store(storeName, QueryableStoreTypes.<String, Long>windowStore());
+    if (windowStore == null) {
+      throw new NotFoundException();
+    }
+    WindowStoreIterator<Long> iterator = windowStore.fetch(author, from, to);
+    while (iterator.hasNext()) {
+      KeyValue<Long, Long> next = iterator.next();
+      long windowTimestamp = next.key;
+      System.out.println("Count  @ time " + windowTimestamp + " is " + next.value);
+      windowResults.add(new KeyValueBean(author + "@" + windowTimestamp, next.value));
     }
 
+    return windowResults;
 
-    /**
+  }
+
+
+
+  /**
      * Start an embedded Jetty Server on the given port
      *
      * @param port port to run the Server on
