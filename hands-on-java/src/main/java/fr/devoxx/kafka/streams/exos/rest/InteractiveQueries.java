@@ -2,6 +2,8 @@ package fr.devoxx.kafka.streams.exos.rest;
 
 import fr.devoxx.kafka.conf.AppConfiguration;
 import fr.devoxx.kafka.streams.exos.rest.services.InteractiveQueriesRestService;
+import fr.devoxx.kafka.streams.exos.store.LocalKVStore;
+import fr.devoxx.kafka.streams.exos.store.WindowedLocalKVStore;
 import fr.devoxx.kafka.streams.exos.transformations.statefull.CountNbrCommitByUser;
 import fr.devoxx.kafka.streams.exos.transformations.statefull.FixCommit;
 import fr.devoxx.kafka.streams.exos.transformations.statefull.NbrCommitByContributorCategory;
@@ -109,8 +111,8 @@ public class InteractiveQueries {
         FixCommit.run(scala_gitlog, stringSerde);
         NbrCommitByContributorCategory.run(commits, stringSerde, longSerde, commitSerde);
         TotalCommitMessageByUser.run(scala_gitlog, stringSerde, intSerde, messageSerde);
-
-
+        LocalKVStore.run(stringSerde, commitSerde, commits);
+s
         //STOP EXO
 
 

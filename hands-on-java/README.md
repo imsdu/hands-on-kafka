@@ -64,7 +64,9 @@ kafka-streams-application-reset  --bootstrap-servers localhost:9092 --zookeeper 
 
 ### Windowing
 ### Querying local key-value stores
+- Count Number of commits per user 
 ### Querying local window stores
+- Count Number of commits per user over windowed periods
 
 ### Exposing the REST endpoints of your application
 - Exposing  state off Stateful exercices :  RUN InteractiveQueries with argumente `localhost:9000 192.168.99.100:9092` for mac or `localhost:9000 localhost:9092` for linux
