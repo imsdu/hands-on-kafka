@@ -17,9 +17,24 @@ Principally the value `URL_BASE :
 docker run --rm --net=host -v /home/sdumas/projects/hands-on-kafka/data:/data -e FORWARDLOGS=0 landoop/fast-data-dev
 ```
 
+## Open shell on running container
+```
+docker ps
+```
+
+```
+docker exec -it [containerId] sh
+```
+
 ## Init kafka topics
 ```
 init.[sh|bat]
+```
+
+## Reset application id
+In your container shell, execute :
+```
+kafka-streams-application-reset  --bootstrap-servers localhost:9092 --zookeeper localhost:2181 --input-topics [topic] --application-id [my-app]
 ```
 
 ## Profit with some exercises !
