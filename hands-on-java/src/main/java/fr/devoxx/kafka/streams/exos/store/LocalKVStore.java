@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LocalKVStore {
 
-    private static final String APP_ID = AppUtils.appID("StreamToStreamJoin");
+    private static final String APP_ID = AppUtils.appID("LocalKV");
 
     public static void main(String[] args) {
 

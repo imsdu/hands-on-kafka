@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class WindowedLocalKVStore {
 
-  private static final String APP_ID = AppUtils.appID("StreamToStreamJoin");
+  private static final String APP_ID = AppUtils.appID("WindowedKV");
   public static final String NAME = "CountWindowedCommitsByAuthor";
   public static final long HOUR = 60 * 60 * 1000;
 
@@ -53,10 +53,10 @@ public class WindowedLocalKVStore {
         
         final KTable<Windowed<String>, Long> countCommitsByAuthor = groupedCommitsByAuthor.count(TimeWindows.of(HOUR), NAME);
       
-        System.out.println("Starting Kafka Streams Local KV Store Example");
+        System.out.println("Starting Kafka Streams Windowed KV Store Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
-        System.out.println("Now started Local KV Store Example");
+        System.out.println("Now started Windowed KV Store Example");
     }
 }
