@@ -44,19 +44,24 @@ public class LocalKVStore {
 
         final KStream<String, GithubCommit> commitStream = kStreamBuilder.stream(stringSerde, commitSerde, "commits");
 
-        final KStream<String, GithubCommit> commitsByLogin = commitStream
-                .filter((key, commit) -> commit != null && commit.getAuthor() != null)
-                .map((key, commit) -> KeyValue.pair(commit.getAuthor().getLogin(), commit));
-
-
-        final KGroupedStream<String, GithubCommit> groupedCommitsByAuthor  = commitsByLogin.groupByKey();
-        final KTable<String, Long> countCommitsByAuthor = groupedCommitsByAuthor.count("CountCommitsByAuthor");
+      final KTable<String, Long> countCommitsByAuthor = run(stringSerde, commitSerde, commitStream);
+      countCommitsByAuthor.print();
 
         System.out.println("Starting Kafka Streams Local KV Store Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
         System.out.println("Now started Local KV Store Example");
+    }
+
+    public static KTable<String, Long> run(Serde<String> stringSerde, Serde<GithubCommit> commitSerde, KStream<String, GithubCommit> commitStream) {
+      final KStream<String, GithubCommit> commitsByLogin = commitStream
+              .filter((key, commit) -> commit != null && commit.getAuthor() != null)
+              .map((key, commit) -> KeyValue.pair(commit.getAuthor().getLogin(), commit));
+
+
+      final KGroupedStream<String, GithubCommit> groupedCommitsByAuthor  = commitsByLogin.groupByKey(stringSerde,commitSerde);
+      return groupedCommitsByAuthor.count("CountCommitsByAuthor");
     }
 
 }

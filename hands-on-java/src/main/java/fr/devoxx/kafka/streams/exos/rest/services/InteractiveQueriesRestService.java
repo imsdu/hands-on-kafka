@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.*;
@@ -36,27 +37,27 @@ import java.util.Objects;
 @Path("state")
 public class InteractiveQueriesRestService {
 
-    private final KafkaStreams streams;
-    private final MetadataService metadataService;
-    private Server jettyServer;
-    private String host;
+  private final KafkaStreams streams;
+  private final MetadataService metadataService;
+  private Server jettyServer;
+  private String host;
 
-    public InteractiveQueriesRestService(final KafkaStreams streams, String host) {
-        this.streams = streams;
-        this.metadataService = new MetadataService(streams);
-        this.host = host;
-    }
+  public InteractiveQueriesRestService(final KafkaStreams streams, String host) {
+    this.streams = streams;
+    this.metadataService = new MetadataService(streams);
+    this.host = host;
+  }
 
 
   @GET
-  @Path("/contributors/{storeName}")
+  @Path("/keyval/{storeName}")
   @Produces(MediaType.APPLICATION_JSON)
   public List<KeyValueBean> CountNbrCommitByUser(@PathParam("storeName") final String storeName) {
 
 
     final List<KeyValueBean> keyValueBeans = new ArrayList<>();
 
-    streams.allMetadataForStore(CountNbrCommitByUser.NAME).forEach(metadata -> {
+    streams.allMetadataForStore(storeName).forEach(metadata -> {
 
       String comppleteHost = metadata.host() + ":" + metadata.port();
 
@@ -73,99 +74,73 @@ public class InteractiveQueriesRestService {
         }
 
       } else {
-
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        String url = "http://" + comppleteHost + "/state/contributors";
-        HttpGet httpGet = new HttpGet(url);
-        try {
-          CloseableHttpResponse response = httpclient.execute(httpGet);
-          String jsonInput = EntityUtils.toString(response.getEntity());
-          ObjectMapper mapper = new ObjectMapper();
-          List<KeyValueBean> responses = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, KeyValueBean.class));
-          keyValueBeans.addAll(responses);
-
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+        String url = "http://" + comppleteHost + "/state/keyval/" + storeName;
+        forward(url, keyValueBeans);
       }
 
     });
-
 
     return keyValueBeans;
 
   }
 
-  @GET
-  @Path("/windowed/{storeName}/{author}/{from}/{to}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public List<KeyValueBean> CountWindowedCommitByUser(@PathParam("storeName") final String storeName,
-                                                      @PathParam("author") final String author,
-                                                      @PathParam("from") final Long from,
-                                                      @PathParam("to") final Long to) {
+  private void forward(String url, List<KeyValueBean> results) {
+    CloseableHttpClient httpclient = HttpClients.createDefault();
+    HttpGet httpGet = new HttpGet(url);
+    try {
+      CloseableHttpResponse response = httpclient.execute(httpGet);
+      String jsonInput = EntityUtils.toString(response.getEntity());
+      ObjectMapper mapper = new ObjectMapper();
+      List<KeyValueBean> responses = mapper.readValue(jsonInput, mapper.getTypeFactory().constructCollectionType(List.class, KeyValueBean.class));
+      results.addAll(responses);
 
-
-    final List<KeyValueBean> windowResults = new ArrayList<>();
-
-    final ReadOnlyWindowStore<String, Long> windowStore = streams.store(storeName, QueryableStoreTypes.<String, Long>windowStore());
-    if (windowStore == null) {
-      throw new NotFoundException();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-    WindowStoreIterator<Long> iterator = windowStore.fetch(author, from, to);
-    while (iterator.hasNext()) {
-      KeyValue<Long, Long> next = iterator.next();
-      long windowTimestamp = next.key;
-      System.out.println("Count  @ time " + windowTimestamp + " is " + next.value);
-      windowResults.add(new KeyValueBean(author + "@" + windowTimestamp, next.value));
-    }
-
-    return windowResults;
-
   }
 
 
+  /**
+   * Start an embedded Jetty Server on the given port
+   *
+   * @param port port to run the Server on
+   * @throws Exception
+   */
+  public void start(final int port) throws Exception {
+    ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+    context.setContextPath("/");
+
+    jettyServer = new Server(port);
+    jettyServer.setHandler(context);
+
+    ResourceConfig rc = new ResourceConfig();
+    rc.register(this);
+    rc.register(JacksonFeature.class);
+
+    ServletContainer sc = new ServletContainer(rc);
+    ServletHolder holder = new ServletHolder(sc);
+    context.addServlet(holder, "/*");
+
+    jettyServer.start();
+  }
 
   /**
-     * Start an embedded Jetty Server on the given port
-     *
-     * @param port port to run the Server on
-     * @throws Exception
-     */
-    public void start(final int port) throws Exception {
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
-
-        jettyServer = new Server(port);
-        jettyServer.setHandler(context);
-
-        ResourceConfig rc = new ResourceConfig();
-        rc.register(this);
-        rc.register(JacksonFeature.class);
-
-        ServletContainer sc = new ServletContainer(rc);
-        ServletHolder holder = new ServletHolder(sc);
-        context.addServlet(holder, "/*");
-
-        jettyServer.start();
+   * Stop the Jetty Server
+   *
+   * @throws Exception
+   */
+  public void stop() throws Exception {
+    if (jettyServer != null) {
+      jettyServer.stop();
     }
+  }
 
-    /**
-     * Stop the Jetty Server
-     *
-     * @throws Exception
-     */
-    public void stop() throws Exception {
-        if (jettyServer != null) {
-            jettyServer.stop();
-        }
-    }
-
-    @GET()
-    @Path("/instances")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<HostStoreInfo> streamsMetadata() {
-        return metadataService.streamsMetadata();
-    }
+  @GET()
+  @Path("/instances")
+  @Produces(MediaType.APPLICATION_JSON)
+  public List<HostStoreInfo> streamsMetadata() {
+    return metadataService.streamsMetadata();
+  }
 
 
 }

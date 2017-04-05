@@ -5,12 +5,14 @@ package fr.devoxx.kafka.streams.exos.rest.services;
  */
 
 import fr.devoxx.kafka.streams.exos.rest.utils.HostStoreInfo;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.state.StreamsMetadata;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.ws.rs.NotFoundException;
 
 /**
  * Looks up StreamsMetadata from KafkaStreams and converts the results
@@ -42,5 +44,4 @@ public class MetadataService {
                 metadata.stateStoreNames()))
                 .collect(Collectors.toList());
     }
-
 }

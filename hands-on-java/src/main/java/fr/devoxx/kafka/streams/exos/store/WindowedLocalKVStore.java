@@ -21,7 +21,7 @@ public class WindowedLocalKVStore {
 
   private static final String APP_ID = AppUtils.appID("WindowedKV");
   public static final String NAME = "CountWindowedCommitsByAuthor";
-  public static final long HOUR = 60 * 60 * 1000;
+  public static final long MS = 1000;
 
   public static void main(String[] args) {
 
@@ -44,19 +44,24 @@ public class WindowedLocalKVStore {
 
         final KStream<String, GithubCommit> commitStream = kStreamBuilder.stream(stringSerde, commitSerde, "commits");
 
-        final KStream<String, GithubCommit> commitsByLogin = commitStream
-                .filter((key, commit) -> commit != null && commit.getAuthor() != null)
-                .map((key, commit) -> KeyValue.pair(commit.getAuthor().getLogin(), commit));
+        final KTable<Windowed<String>, Long> countCommitsByAuthor = run(stringSerde, longSerde, commitStream);
 
+        countCommitsByAuthor.print();
 
-        final KGroupedStream<String, GithubCommit> groupedCommitsByAuthor  = commitsByLogin.groupByKey();
-        
-        final KTable<Windowed<String>, Long> countCommitsByAuthor = groupedCommitsByAuthor.count(TimeWindows.of(HOUR), NAME);
-      
         System.out.println("Starting Kafka Streams Windowed KV Store Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
         System.out.println("Now started Windowed KV Store Example");
     }
+
+  public static KTable<Windowed<String>, Long> run(Serde<String> stringSerde, Serde<Long> longSerde, KStream<String, GithubCommit> commitStream) {
+    final KStream<String, Long> commitsByLogin = commitStream
+            .filter((key, commit) -> commit != null && commit.getAuthor() != null)
+            .map((key, commit) -> KeyValue.pair(commit.getAuthor().getLogin(), 1L));
+    
+    final KGroupedStream<String, Long> groupedCommitsByAuthor  = commitsByLogin.groupBy((key, val) -> key, stringSerde, longSerde);
+
+    return groupedCommitsByAuthor.count(TimeWindows.of(MS), NAME);
+  }
 }
