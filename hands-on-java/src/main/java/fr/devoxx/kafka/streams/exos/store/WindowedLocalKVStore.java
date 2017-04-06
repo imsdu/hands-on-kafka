@@ -21,7 +21,7 @@ public class WindowedLocalKVStore {
 
   private static final String APP_ID = AppUtils.appID("WindowedKV");
   public static final String NAME = "CountWindowedCommitsByAuthor";
-  public static final long MS = 1000;
+  public static final long DURATION = 1000;
 
   public static void main(String[] args) {
 
@@ -62,6 +62,10 @@ public class WindowedLocalKVStore {
     
     final KGroupedStream<String, Long> groupedCommitsByAuthor  = commitsByLogin.groupBy((key, val) -> key, stringSerde, longSerde);
 
-    return groupedCommitsByAuthor.count(TimeWindows.of(MS), NAME);
+    // Fixed Window
+    return groupedCommitsByAuthor.count(TimeWindows.of(DURATION).advanceBy(DURATION), NAME);
+
+    // Hopping Window
+    //    return groupedCommitsByAuthor.count(TimeWindows.of(DURATION).advanceBy(DURATION/2), NAME);
   }
 }
