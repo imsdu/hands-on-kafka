@@ -53,28 +53,32 @@ public class TableToTableJoinApp {
 
         final Serde<GithubCommit> commitSerde = Serdes.serdeFrom(commitSerializer, commitSerializer);
 
-        final KTable<String, GithubCommit> lastCommitByUser = kStreamBuilder.stream(stringSerde, commitSerde, "commits")
-                .filter((key, commit) -> commit != null && commit.getAuthor() != null)
-                .groupBy((key, commit) -> commit.getAuthor().getLogin(), stringSerde, commitSerde)
-                .reduce((v1, v2) -> {
-                            if (v1.getCommit().getAuthor().getDate().before(v2.getCommit().getAuthor().getDate())) {
-                                return v1;
-                            } else {
-                                return v2;
-                            }
-        }, "LastCommitTable");
-
-        // Join !
-        final KTable<String, String> lastCommits = lastCommitByUser.join(userTable,
-                (commit, user) -> user.getLogin() + " " + user.getEmail() + " " + commit.getSha() + " " + commit.getCommit().getMessage()
-        );
-
-        lastCommits.print();
+      run(stringSerde, kStreamBuilder, userTable, commitSerde);
 
         System.out.println("Starting Kafka Streams Joins Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
         kafkaStreams.cleanUp();
         kafkaStreams.start();
         System.out.println("Now started Gitlog Example");
+    }
+
+    public static void run(Serde<String> stringSerde, KStreamBuilder kStreamBuilder, KTable<String, GithubUser> userTable, Serde<GithubCommit> commitSerde) {
+      final KTable<String, GithubCommit> lastCommitByUser = kStreamBuilder.stream(stringSerde, commitSerde, "commits")
+              .filter((key, commit) -> commit != null && commit.getAuthor() != null)
+              .groupBy((key, commit) -> commit.getAuthor().getLogin(), stringSerde, commitSerde)
+              .reduce((v1, v2) -> {
+                          if (v1.getCommit().getAuthor().getDate().before(v2.getCommit().getAuthor().getDate())) {
+                              return v1;
+                          } else {
+                              return v2;
+                          }
+      }, "LastCommitTable");
+
+      // Join !
+      final KTable<String, String> lastCommits = lastCommitByUser.join(userTable,
+              (commit, user) -> user.getLogin() + " " + user.getEmail() + " " + commit.getSha() + " " + commit.getCommit().getMessage()
+      );
+
+      lastCommits.print();
     }
 }
