@@ -12,9 +12,38 @@ Principally the value `URL_BASE :
 - if you are in linux  user `localhost`
 - if you use some VM put the address of it
 
-## Running landoop docker and launch all kafka services
+## Running landoop docker and launch all kafka services on linux
 ```
-docker run --rm --net=host -v /home/sdumas/projects/hands-on-kafka/data:/data -e FORWARDLOGS=0 landoop/fast-data-dev
+docker run --rm --net=host -v path/to/project/hands-on-kafka/data:/data -e FORWARDLOGS=0 -e RUNTESTS=0 -e DEBUG=1 landoop/fast-data-dev
+```
+
+You may have to make file access for containers more permissive via the command:
+```
+su -c "setenforce 0"
+```
+
+## Run landoop/fast-data-dev on mac
+
+On Mac OS X allocate at least 6GB RAM to the VM:
+
+    docker-machine create --driver virtualbox --virtualbox-cpu-count "4"  --virtualbox-memory "6024" devel
+    eval $(docker-machine env devel)
+
+
+Execute the result of
+
+```
+docker-machine env devel
+```
+
+And define ports and advertise hostname:
+ <!>  Replace  `myPathToTheProject` with a real path <!>
+
+```
+docker run --rm -p 2181:2181 -p 3030:3030 -p 8081-8083:8081-8083 \
+           -p 9581-9585:9581-9585 -p 9092:9092 -v /myPathToTheProject/hands-on-kafka/data:/data -e ADV_HOST=192.168.99.100  -e CONNECT_HEAP=3G -e FORWARDLOGS=0 -e RUNTESTS=0 -e DEBUG=1 \
+           landoop/fast-data-dev:latest
+
 ```
 
 ## Open shell on running container
