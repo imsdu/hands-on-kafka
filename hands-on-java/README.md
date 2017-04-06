@@ -44,18 +44,17 @@ kafka-streams-application-reset  --bootstrap-servers localhost:9092 --zookeeper 
 - Add new lines to input file
 
 ### Stateless transformations
-- Create a topic with [key, value] =>  [ID COMMIT,CONTRIBUTOR]
-- Create a topics related about a fix and another for the others [ID COMMIT,COMMENT]
-- Create a topic with [key, value] =  [ID CONTRIBUTOR,CONTRIBUTOR INFO]
-- Create 2 topic with [key, value] =  [ID ,COMMIT] with commit relate to a fix and not
-- Create POJO pour user and a topic with [key, value] =  [ID USER,USER]
-- List of commit from  contributor who doesn't work for Lightbend
+- CommitContributor: Create a topic with [key, value] =>  [ID COMMIT,CONTRIBUTOR]
+- FixStreams / CommitComment: Create a topics related about a fix and another for the others [ID COMMIT,COMMENT]
+- BranchCommit: Create 2 topic with [key, value] =  [ID ,COMMIT] with commit relate to a fix and not
+- ContributorNoLightbend: List of commit from  contributor who doesn't work for Lightbend
+- ContributorsStreams: Create a topic with [key, value] =  [ID CONTRIBUTOR,CONTRIBUTOR INFO]
 
 ### Stateful transformations
-- With a table with with a count of commit by contributor
-- Make a table for know how many commit relate to a "fix" for each year
-- Make a table with the total size of comment by author
-- Make a table with the total of commit from people who work for EPFL, Lightbend and Other
+- CountNbrCommitByUser: With a table with  a count of commit by contributor
+- FixCommit: Make a table for know how many commit relate to a "fix" for each year
+- TotalCommitMessageByUser: Make a table with the total size of comment by author
+- NbrCommitByContributorCategory: Make a table with the total of commit from people who work for EPFL, Lightbend and Other
 
 ### Joining
 - StreamToTableJoin: Join user table with commit stream to find users who have commited on the Scala repository
@@ -64,9 +63,9 @@ kafka-streams-application-reset  --bootstrap-servers localhost:9092 --zookeeper 
 
 ### Windowing
 ### Querying local key-value stores
-- Count Number of commits per user 
+- LocalKVStore: Count Number of commits per user 
 ### Querying local window stores
-- Count Number of commits per user over windowed periods
+- WindowedLocalKVStore: Count Number of commits per user over windowed periods
 
 ### Exposing the REST endpoints of your application
 - Exposing  state off Stateful exercices :  RUN InteractiveQueries with argumente `localhost:9000 192.168.99.100:9092` for mac or `localhost:9000 localhost:9092` for linux
