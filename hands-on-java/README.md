@@ -58,9 +58,9 @@ kafka-streams-application-reset  --bootstrap-servers localhost:9092 --zookeeper 
 - Make a table with the total of commit from people who work for EPFL, Lightbend and Other
 
 ### Joining
-- Join user table with commit stream to find users who have commited on the Scala repository
-- Join user table with commit table to get the last commit on Scala repository for each user
-- Join the user with streams with commit streams to find number of commits for each user (even for users who haven't commited on Scala repository)
+- StreamToTableJoin: Join user table with commit stream to find users who have commited on the Scala repository
+- TableToTableJoin: Join user table with commit table to get the last commit on Scala repository for each user
+- StreamToStreamJoin: Join the user with streams with commit streams to find number of commits for each user (even for users who haven't commited on Scala repository)
 
 ### Windowing
 ### Querying local key-value stores
