@@ -56,15 +56,7 @@ public class ContributorsStreams {
     }
 
     public static void run(KStreamBuilder kStreamBuilder, Serde<Integer> integerSerde, Serde<String> stringSerde, Serde<Contributor> contributorSerde) {
-        KStream<String, Contributor> contributorStream =
-                kStreamBuilder.stream(stringSerde, contributorSerde, AppConfiguration.CONTRIBUTORS_TOPIC);
-
-        KStream<Integer, Contributor> commit = contributorStream
-                .map((k, v) ->
-                        KeyValue.pair(v.getId(), v));
-
-
-        commit.to(integerSerde, contributorSerde, NAME);
+      // TDO
     }
 
 

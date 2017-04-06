@@ -56,22 +56,7 @@ public class StreamToStreamJoinApp {
         final KStream<String, GithubCommit> commitStream = kStreamBuilder.stream(stringSerde, commitSerde, "commits");
 
         // Join !
-        final KStream<String, GithubUser> userByLogin = userStream.map((key, user) -> KeyValue.pair(user.getLogin(), user));
-        final KStream<String, GithubCommit> commitsByLogin = commitStream
-                .filter((key, commit) -> commit != null && commit.getAuthor() != null)
-                .map((key, commit) -> KeyValue.pair(commit.getAuthor().getLogin(), commit));
-
-        final KStream<String, Long> userCommits = userByLogin.leftJoin(commitsByLogin,
-                (user, commit) -> { if(commit == null) { return 0L; } else { return 1L; } },
-                JoinWindows.of(TimeUnit.SECONDS.toMillis(60)),
-                stringSerde, userSerde, commitSerde
-        );
-
-        final KTable<String, Long> nbCommitsByUser = userCommits.groupByKey(stringSerde, longSerde).reduce((v1, v2) -> v1 + v2, "CommitSum");
-
-        nbCommitsByUser.to(stringSerde, longSerde,"NbCommitsPerUserTopic");
-
-        nbCommitsByUser.print();
+      run(stringSerde, longSerde, userSerde, userStream, commitSerde, commitStream);
 
         System.out.println("Starting Kafka Streams Joins Example");
         KafkaStreams kafkaStreams = new KafkaStreams(kStreamBuilder, config);
@@ -79,4 +64,8 @@ public class StreamToStreamJoinApp {
         kafkaStreams.start();
         System.out.println("Now started Gitlog Example");
     }
+
+  public static void run(Serde<String> stringSerde, Serde<Long> longSerde, Serde<GithubUser> userSerde, KStream<String, GithubUser> userStream, Serde<GithubCommit> commitSerde, KStream<String, GithubCommit> commitStream) {
+       // TODO
+  }
 }

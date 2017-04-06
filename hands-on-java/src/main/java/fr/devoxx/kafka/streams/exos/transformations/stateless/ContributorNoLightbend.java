@@ -55,15 +55,7 @@ public class ContributorNoLightbend {
     }
 
     public static void run(KStreamBuilder kStreamBuilder, Serde<String> stringSerde, Serde<GithubCommit> commitSerde) {
-        KStream<String, GithubCommit> messagesStream =
-                kStreamBuilder.stream(stringSerde, commitSerde, AppConfiguration.COMMITS_TOPIC);
-
-        KStream<String, GithubCommit> commit = messagesStream
-                .selectKey((k,v )-> v.getSha())
-                .filterNot((k,v) -> v.getCommit().getAuthor().getEmail().contains("@lightbend.com"));
-
-
-        commit.to(stringSerde, commitSerde, NAME);
+      // TODO
     }
 
 

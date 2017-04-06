@@ -62,13 +62,8 @@ public class FixCommit {
     }
 
     public static KTable<String, Long> run( KStream<String, GitMessage> commits, Serde<String> stringSerde) {
-
-
-        return commits
-                .map((k,v) -> KeyValue.pair(v.getDate().split("-")[0] , v.getMessage()))
-                .filter((k,v) -> v != null && v.toLowerCase().contains(" fix "))
-                .groupByKey(stringSerde,stringSerde)
-                .count(NAME);
+      // TODO
+      return null;
     }
 
 }

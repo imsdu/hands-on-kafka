@@ -54,14 +54,7 @@ public class CommitContributor {
     }
 
     public static void run(KStreamBuilder kStreamBuilder, Serde<String> stringSerde, Serde<GitMessage> messageSerde) {
-        KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC);
-
-        KStream<String, String> commit = messagesStream
-                .map((k,v) -> KeyValue.pair(v.getHash(),v.getAuthor()));
-
-
-        commit.to(stringSerde, stringSerde, NAME);
+      // TODO
     }
 
 

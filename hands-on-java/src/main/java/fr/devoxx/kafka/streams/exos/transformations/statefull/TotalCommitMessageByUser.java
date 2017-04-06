@@ -59,25 +59,7 @@ public class TotalCommitMessageByUser {
     }
 
     public static void run(KStream<String, GitMessage> scala_gitlog, Serde<String> stringSerde, Serde<Integer> intSerde, Serde<GitMessage> messageSerde) {
-
-        KTable<String, Integer> aggregate = scala_gitlog
-                .groupBy((k, v) -> v.getAuthor(), stringSerde, messageSerde)
-                .aggregate(
-                        () -> 0,
-                        (aggKey, newValue, aggValue) -> {
-
-                            if (newValue.getMessage() != null) {
-                                return aggValue + newValue.getMessage().length();
-
-                            } else {
-                                return aggValue;
-                            }
-                        },
-                        intSerde,
-                        NAME
-                );
-
-        aggregate.to(stringSerde, intSerde, NAME);
+       // TODO
     }
 
 }

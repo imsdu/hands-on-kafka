@@ -60,24 +60,7 @@ public class NbrCommitByContributorCategory {
     }
 
     public static void run(KStream<String, GithubCommit> commits, Serde<String> stringSerde, Serde<Long> longSerde, Serde<GithubCommit> commitSerde) {
-
-        KTable<String, Long> commit = commits
-                .selectKey((k, v) -> v.getSha())
-                .map((k, v) -> {
-                    String category = "OTHER";
-                    String email = v.getCommit().getAuthor().getEmail();
-                    if (email.contains("@lightbend.com"))
-                        category = "LIGHTBEND";
-                    else if (email.contains("@epfl.ch"))
-                        category = "EPFL";
-
-                    return KeyValue.pair(category, v);
-                })
-                .groupByKey(stringSerde,commitSerde)
-                .count(NAME);
-
-
-        commit.to(stringSerde, longSerde, NAME);
+      // TODO
     }
 
 

@@ -54,18 +54,8 @@ public class BranchCommit {
     }
 
     public static void run(KStreamBuilder kStreamBuilder, Serde<String> stringSerde, Serde<GitMessage> messageSerde) {
-        KStream<String, GitMessage> messagesStream =
-                kStreamBuilder.stream(stringSerde, messageSerde, AppConfiguration.SCALA_GITLOG_TOPIC)
-                        .map((k, v) -> KeyValue.pair(v.getHash(), v));
 
-        KStream<String, GitMessage>[] commit = messagesStream.branch(
-                (key, value) -> value.getMessage() != null && value.getMessage().toLowerCase().contains("fix"),
-                (key, value) -> value.getMessage() != null && !value.getMessage().toLowerCase().contains("fix")
-        );
-
-
-        commit[0].to(stringSerde, messageSerde, NAME + "_FIX");
-        commit[1].to(stringSerde, messageSerde, NAME + "_FEAT");
+      // TODO
     }
 
 

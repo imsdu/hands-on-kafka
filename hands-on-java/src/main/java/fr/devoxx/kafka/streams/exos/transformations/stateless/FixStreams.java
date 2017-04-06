@@ -56,14 +56,7 @@ public class FixStreams {
     }
 
     public static void run( KStream<String, GithubCommit> contributorStream, Serde<String> stringSerde, Serde<GithubCommit> githubCommitSerde) {
-
-
-        KStream<String, GithubCommit> commit = contributorStream
-                .selectKey((k, v) -> v.getSha())
-        .filter((k,v)-> v.getCommit().getMessage().toLowerCase().contains("fix "));
-
-        commit.print();
-        commit.to(stringSerde, githubCommitSerde, NAME);
+      // TODO
     }
 
 
