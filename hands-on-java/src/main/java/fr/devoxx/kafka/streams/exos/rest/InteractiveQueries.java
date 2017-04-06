@@ -112,7 +112,7 @@ public class InteractiveQueries {
         NbrCommitByContributorCategory.run(commits, stringSerde, longSerde, commitSerde);
         TotalCommitMessageByUser.run(scala_gitlog, stringSerde, intSerde, messageSerde);
         LocalKVStore.run(stringSerde, commitSerde, commits);
-s
+
         //STOP EXO
 
 
